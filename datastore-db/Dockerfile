@@ -1,0 +1,8 @@
+FROM mysql:5
+
+ENV MYSQL_ROOT_PASSWORD 112233AABBCC
+ENV MYSQL_DATABASE annotateMe
+ENV MYSQL_USER annotateMe_service
+ENV MYSQL_PASSWORD 112233AABBCC
+
+ADD setup.sql /docker_entrypoint-initdb.d
