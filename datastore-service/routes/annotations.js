@@ -29,7 +29,7 @@ router.get('/:id', function(req, res, next){
         });
     });
 });
-
+  
 //Create new annotation entry 
 router.post('/', function(req, res, next){
     models.Annotation.create({
