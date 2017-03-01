@@ -1,6 +1,7 @@
 var express     = require('express');
 var router      = express.Router();
 var models      = require('../models');
+var controller  = require('../controllers/document_controller');
 
 //GET all documents
 router.get('/', function(req, res, next) {
@@ -32,12 +33,7 @@ router.get('/:id', function(req, res, next){
 
 //Create new document entry
 router.post('/', function(req, res, next){
-    models.Document.create({
-        path:  req.body.path,
-        dataset: req.body.dataset,
-        length_index: req.body.lengthIdx,
-        nr_characters: req.body.numCharacter
-    }).then(function(document){
+    controller.createDocument(req.body, function(document) {
         //Return Response
         res.json({
             "status": 201,

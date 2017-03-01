@@ -51,7 +51,7 @@ exports.mentionSelection = function(text, stanfordEntities, dbPediaEntities, onR
                     //The dbpedia entity is part of the ner entity, so we take the ner entity
                     newEntities.push({
                         "name": stanfordEntity,
-                        "offset": idx,
+                        "index": idx,
                         "length": length2
                     });
                     nerEntities.splice(j, 1);
@@ -60,7 +60,7 @@ exports.mentionSelection = function(text, stanfordEntities, dbPediaEntities, onR
                     //The ner entity is part of the dbpedia entity, so we take the dbpedia entity
                     newEntities.push({
                         "name": dbpediaEntity,
-                        "offset": idx1,
+                        "index": idx1,
                         "length": length1
                     });
                     //break loop2;
@@ -68,7 +68,7 @@ exports.mentionSelection = function(text, stanfordEntities, dbPediaEntities, onR
                     //Both have recognized the same entity, so we can take either of them
                     newEntities.push({
                         "name": stanfordEntity,
-                        "offset": idx1,
+                        "index": idx,
                         "length": length1
                     });
                     nerEntities.splice(j, 1);
@@ -79,10 +79,12 @@ exports.mentionSelection = function(text, stanfordEntities, dbPediaEntities, onR
 
     //Append what is left from the nerEntities array 
     for(var i = 0; i < nerEntities.length; i++) {
+        var idx = text.indexOf(nerEntities[i]);
+        var length = nerEntities[i].length;
         newEntities.push({
             "name": nerEntities[i],
-            "offset": idx1,
-            "length": length1
+            "index": idx,
+            "length": length
         });
     }
 
@@ -198,7 +200,7 @@ exports.mentionMerging = function(entities, tokens, callback) {
  * @param callback:         Callback to pass the results JSON object(s) back
  */
 exports.mentionFiltering = function(entities, callback) {
-    console.log("tokenizer::mentionMerging");
+    console.log("tokenizer::mentionFiltering");
     var filteredEntities = [];
 
     loop1:
@@ -260,7 +262,7 @@ var checkIfTokenIsEntity = function(token, entities) {
 var mergeTwoEntities = function(entity1, entity2, betweenTokens) {
     return {
         'name': entity1.name.concat(" "+betweenTokens.concat(" "+entity2.name)),
-        'offset': entity1.offset,
-        'length': (entity2.offset - entity1.offset) + entity2.length
+        'index': entity1.index,
+        'length': (entity2.index - entity1.index) + entity2.length
     };
 }

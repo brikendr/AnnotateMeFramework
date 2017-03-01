@@ -3,6 +3,7 @@
 module.exports = function(sequelize, DataTypes) {
     var Document = sequelize.define('Document', {
         path:  { type: DataTypes.STRING, allowNull: false},
+        content: { type: DataTypes.TEXT('long'), allowNull: false},
         dataset: DataTypes.STRING(45),
         total_entries: {type: DataTypes.INTEGER, defaultValue: 0},
         total_linked_entities: {type: DataTypes.INTEGER, defaultValue: 0},
