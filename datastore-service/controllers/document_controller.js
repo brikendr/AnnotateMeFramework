@@ -35,9 +35,9 @@ exports.persistEntities = function(data, callBack) {
         saveSentance(sentance, documentID, function(savedSentance){
             
             async.forEach(namedEntities, function (entity, callback){ 
-            saveEntity(entity, savedSentance, documentID, function(savedEntity){
-                callback();
-            });
+                saveEntity(entity, savedSentance, documentID, function(savedEntity){
+                    callback();
+                });
             }, function(err) {
                 callback();
             });
@@ -47,6 +47,27 @@ exports.persistEntities = function(data, callBack) {
         callBack();
     });
         
+}
+
+exports.persistKeywords = function(data, callBack) {
+    models.Document.find({
+        where: {
+            id: data.documentID
+        }
+    }).then(function(document){
+        if(!document){
+            callBack(false);
+        } else {
+            //Insert Keywords 
+            async.forEach(data.keywords, function (keyword, callback){
+                saveKeyword(keyword.text, data.documentID, function(savedEntity){
+                    callback();
+                });
+            }, function(err) {
+                callBack(true);
+            });
+        }
+    });
 }
 
 var saveSentance = function(sentance, documentID, callBack) {
@@ -75,5 +96,14 @@ var saveEntity = function(entity, sentance, documentID, callBack) {
     } else {
         callBack();
     }
+}
+
+var saveKeyword = function(keyword, documentID, callBack) {
+    models.Keyword.create({
+        keyword:  keyword,
+        DocumentId: documentID
+    }).then(function(result){
+        callBack(result);
+    });
 }
 

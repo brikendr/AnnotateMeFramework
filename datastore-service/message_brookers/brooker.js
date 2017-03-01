@@ -29,10 +29,12 @@ connection.on('ready', function(){
                                 exchange.publish(
                                     "extract.document.entities&keywords", 
                                     {
-                                        'documentID': document.id, 
-                                        'textData'  : document.content,
-                                        'confidence': message.confidence,
-                                        'support'   : message.support
+                                        'documentID'            : document.id, 
+                                        'textData'              : document.content,
+                                        'confidence'            : message.confidence,
+                                        'support'               : message.support,
+                                        'nrKeywordsToExtract'   : message.nrKeywordsToExtract,
+                                        'nrConceptsToExtract'   : message.nrConceptsToExtract
                                     },  
                                     {contetnType: 'applicaton/json'}
                                 );
@@ -42,6 +44,13 @@ connection.on('ready', function(){
                             console.log("RECEIVED a message for document entity creation!");
                             docController.persistEntities(message, function(persisted){
                                 console.log('Entities and sentances have been persisted!');
+                            });
+                        }
+                        else if(message.routeKey == 'createKeywords') {
+                            console.log("RECEIVED a message for document keyword creation!");
+                            docController.persistKeywords(message, function(persisted){
+                                if(!persisted) {console.log('Keywords not persisted! Something went wrong')}
+                                else {console.log('Keywords have been persisted!');}
                             });
                         }
 
