@@ -70,6 +70,17 @@ exports.persistKeywords = function(data, callBack) {
     });
 }
 
+exports.findSentancesByDocumentID = function(data, callBack) {
+    models.Sentance.findAll({
+        where: {
+            documentID: data.documentID
+        },
+        include: [models.EntityMention]
+    }).then(function(result){
+        callBack(result);
+    });
+}
+
 var saveSentance = function(sentance, documentID, callBack) {
     models.Sentance.create({
         description: sentance.value,

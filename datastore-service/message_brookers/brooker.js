@@ -1,5 +1,6 @@
 var amqp        = require('amqp');
 var docController  = require('../controllers/document_controller');
+var entityController = require('../controllers/entity_controller');
 
 var connection = amqp.createConnection({ host: process.env.RABBITMQ_HOST });
 
@@ -44,6 +45,18 @@ connection.on('ready', function(){
                             console.log("RECEIVED a message for document entity creation!");
                             docController.persistEntities(message, function(persisted){
                                 console.log('Entities and sentances have been persisted!');
+                                console.log('Publishing message to extract context clues!');
+                                docController.findSentancesByDocumentID(message, function(sentances){
+                                    exchange.publish(
+                                        "extract.entity.clues", 
+                                        {
+                                            'documentID'            : message.documentID, 
+                                            'sentances'             : sentances,
+                                            'sentanceRestricted'    : message.sentanceRestricted
+                                        },  
+                                        {contetnType: 'applicaton/json'}
+                                    );
+                                });
                             });
                         }
                         else if(message.routeKey == 'createKeywords') {
@@ -51,6 +64,11 @@ connection.on('ready', function(){
                             docController.persistKeywords(message, function(persisted){
                                 if(!persisted) {console.log('Keywords not persisted! Something went wrong')}
                                 else {console.log('Keywords have been persisted!');}
+                            });
+                        } else if (message.routeKey == 'createCollocations') {
+                            console.log("RECEIVED a message for creating collocation for entities!");
+                            entityController.createEntityCollocations(message, function(){
+                                console.log('Collocations have been persisted');
                             });
                         }
 

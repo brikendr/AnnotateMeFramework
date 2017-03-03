@@ -215,12 +215,29 @@ router.get('/:id/sentances', function(req, res, next){
     });
 });
 
+router.get('/:id/sentances/all', function(req, res, next){
+    controller.findSentancesByDocumentID({'documentID': req.params.id}, function(document) {
+         if(!document){
+            res.json({
+                "status": 404,
+                "errorMsg": "Resource not found!"
+            });
+        }
+        //Return Response
+        res.json({
+            "status": 201,
+            "resource": document
+        });
+    });
+})
+
 //GET Document Sentance by ID 
 router.get('/:id/sentances/:sentanceID', function(req, res, next){
     models.Sentance.find({
         where: {
             id: req.params.sentanceID
-        }
+        },
+        include: [models.EntityMention]
     }).then(function(result){
         if(!result){
             res.json({
