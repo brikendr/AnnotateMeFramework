@@ -69,15 +69,19 @@ exports.namedEntityExtractor = function(data, exchange, callBack){
                         tokenizer.mentionFiltering(mergedEntities, function(filteredEntities){
 
                             var finalResult = {
-                                "status": statusCode,
-                                "text": textData,
-                                "documentID": documentID,
-                                "entities": filteredEntities,
-                                "stanford": NEREntities,
-                                "dbpedia": AnnotatorEntities,
-                                "sections": sections,
+                                "status"                : statusCode,
+                                "text"                  : textData,
+                                "documentID"            : documentID,
+                                "entities"              : filteredEntities,
+                                "stanford"              : NEREntities,
+                                "dbpedia"               : AnnotatorEntities,
+                                "sections"              : sections,
                                 "tokensWithPunctuations": tokens2,
-                                "tokensByWords": tokens
+                                "tokensByWords"         : tokens,
+                                'confidence'            : confidence,
+                                'support'               : support,
+                                'nrKeywordsToExtract'   : data.nrKeywordsToExtract,
+                                'nrConceptsToExtract'   : data.nrConceptsToExtract
                             }
                             console.log('Everything went smooth, calling publish!');
                             //Return callback

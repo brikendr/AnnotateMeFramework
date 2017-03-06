@@ -89,16 +89,17 @@ connection.on('ready', function(){
                         else if (message.routeKey == 'createEntityCandidates') {
                             console.log("RECEIVED a message for entity candidate creation!");
                             entityController.createEntityCandidates(message, function(){
-                                    exchange.publish(
-                                        "document.datageneration.done", 
-                                        {
-                                            'status' : 200,
-                                            'msg': 'All the data for the document has been generated!',
-                                            'documentID' : message.documentID, 
-                                        },  
-                                        {contetnType: 'applicaton/json'}
-                                    );
-                                }); 
+                                console.log('Candidates Persisted. Publishing DONE message');
+                                exchange.publish(
+                                    "document.datageneration.done", 
+                                    {
+                                        'status' : 200,
+                                        'msg': 'All the data for the document has been generated!',
+                                        'documentID' : message.documentID, 
+                                    },  
+                                    {contetnType: 'applicaton/json'}
+                                );
+                            }); 
                         }
                     });
                 });

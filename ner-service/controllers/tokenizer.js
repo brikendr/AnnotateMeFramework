@@ -12,7 +12,8 @@ exports.tokenizeText = function(text, onResult){
     console.log("tokenizer::TokenizeText");
     var tokens = tokenize.words()(text);
     var tokens2 = text.split(/\s*\b\s*/);
-    var sections = tokenize.sections()(text);
+    var sentancesByPeriod = tokenize.re(/([^\n\.;!?]+)/i);
+    var sections = sentancesByPeriod(text);
     onResult(tokens, tokens2, sections);
 };
 
@@ -30,7 +31,9 @@ exports.mentionSelection = function(text, stanfordEntities, dbPediaEntities, onR
     var newEntities = [];
     // Loop through entities recognized by Stanford NER
     for (var key in stanfordEntities) {
-        nerEntities.push.apply(nerEntities, stanfordEntities[key]);
+        if(key != 'DATE'){
+            nerEntities.push.apply(nerEntities, stanfordEntities[key]);
+        }
     }
 
 
@@ -47,7 +50,7 @@ exports.mentionSelection = function(text, stanfordEntities, dbPediaEntities, onR
                 var idx = text.indexOf(stanfordEntity);
                 var length2 = stanfordEntity.length;
 
-                if((idx1 > idx) && (idx1+length1 <= idx+length2)){
+                if((idx1 > idx) && (idx1+length1 <= idx+length2) && !checkForExistance(stanfordEntity, newEntities)){
                     //The dbpedia entity is part of the ner entity, so we take the ner entity
                     newEntities.push({
                         "name": stanfordEntity,
@@ -56,7 +59,7 @@ exports.mentionSelection = function(text, stanfordEntities, dbPediaEntities, onR
                     });
                     nerEntities.splice(j, 1);
                     break loop2;
-                } else if((idx > idx1) && (idx+length2 <= idx1+length1)) {
+                } else if((idx > idx1) && (idx+length2 <= idx1+length1) && !checkForExistance(dbpediaEntity, newEntities)) {
                     //The ner entity is part of the dbpedia entity, so we take the dbpedia entity
                     newEntities.push({
                         "name": dbpediaEntity,
@@ -64,7 +67,7 @@ exports.mentionSelection = function(text, stanfordEntities, dbPediaEntities, onR
                         "length": length1
                     });
                     //break loop2;
-                } else if (idx == idx1 && idx+length2 == idx1+length1) {
+                } else if (idx == idx1 && idx+length2 == idx1+length1 && !checkForExistance(stanfordEntity, newEntities)) {
                     //Both have recognized the same entity, so we can take either of them
                     newEntities.push({
                         "name": stanfordEntity,
@@ -81,13 +84,14 @@ exports.mentionSelection = function(text, stanfordEntities, dbPediaEntities, onR
     for(var i = 0; i < nerEntities.length; i++) {
         var idx = text.indexOf(nerEntities[i]);
         var length = nerEntities[i].length;
-        newEntities.push({
-            "name": nerEntities[i],
-            "index": idx,
-            "length": length
-        });
+        if(!checkForExistance(nerEntities[i], newEntities)){
+            newEntities.push({
+                "name": nerEntities[i],
+                "index": idx,
+                "length": length
+            });
+        }
     }
-
     onResult(newEntities);
 }
 
@@ -131,13 +135,11 @@ exports.mentionMerging = function(entities, tokens, callback) {
                 var mergedEntity = mergeTwoEntities(currentEntity, nextEntity, "");
                 mergedEntities.push(mergedEntity);
 
-                //Remove the two entities from the original array
-                entities.splice(i,2);
-
                 //Append whats left from entities array into the mergedEntities array
-                mergedEntities.push.apply(mergedEntities, entities);
+                mergedEntities.push.apply(mergedEntities, entities.splice(i+1));
 
                 //Recursively call the function with the merged entities and whats left from original entity array
+                console.log('Calling recursive func 1');
                 return this.mentionMerging(mergedEntities, tokens, callback);
             }
             /* If there is one token between the entities and if those tokens are one of:
@@ -151,11 +153,8 @@ exports.mentionMerging = function(entities, tokens, callback) {
                     var mergedEntity = mergeTwoEntities(currentEntity, nextEntity, tokens[idxNext-1]);
                     mergedEntities.push(mergedEntity);
 
-                    //Remove the two entities from the original array
-                    entities.splice(i,2);
-
                     //Append whats left from entities array into the mergedEntities array
-                    mergedEntities.push.apply(mergedEntities, entities);
+                    mergedEntities.push.apply(mergedEntities, entities.splice(i+1));
 
                     //Recursively call the function with the merged entities and whats left from original entity array
                     return this.mentionMerging(mergedEntities, tokens, callback);
@@ -171,11 +170,8 @@ exports.mentionMerging = function(entities, tokens, callback) {
                     var mergedEntity = mergeTwoEntities(currentEntity, nextEntity, tokens[idxNext-2].concat(tokens[idxNext-1]));
                     mergedEntities.push(mergedEntity);
 
-                    //Remove the two entities from the original array
-                    entities.splice(i,2);
-
                     //Append whats left from entities array into the mergedEntities array
-                    mergedEntities.push.apply(mergedEntities, entities);
+                    mergedEntities.push.apply(mergedEntities, entities.splice(i+1));
 
                     //Recursively call the function with the merged entities and whats left from original entity array
                     return this.mentionMerging(mergedEntities, tokens, callback);
@@ -240,7 +236,7 @@ exports.mentionFiltering = function(entities, callback) {
 var getEntityOccurrance = function(entity, tokens, targetTokenIdx){
     var entityTokens = entity.name.split(" ");
     var index = tokens.indexOf(entityTokens[targetTokenIdx == 1 ? 0:entityTokens.length - 1]);
-    return index;
+    return index == -1 ? -100:index;
 }
 
 /**
@@ -265,4 +261,13 @@ var mergeTwoEntities = function(entity1, entity2, betweenTokens) {
         'index': entity1.index,
         'length': (entity2.index - entity1.index) + entity2.length
     };
+}
+
+var checkForExistance = function(targetEntitiy, list) {
+    for(var i = 0; i < list.length; i++) {
+        if(list[i].name.indexOf(targetEntitiy) != -1 && targetEntitiy.length <= list[i].name.length)  {
+            return true;
+        }
+    }
+    return false;
 }

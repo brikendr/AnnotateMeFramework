@@ -20,7 +20,6 @@ exports.generateCandidateEntities = function(data, callBack) {
     ,   support = data.support,
         documentID = data.documentID,
         entitiesWithCandidates = [];
-
     
     async.forEach(entities, function (entity, callback){
         entity.candidates = [];
@@ -61,33 +60,37 @@ var queryDBPediaSpotlight = function(entity, confidence, support, callBack){
     rest.postRequestJSON(options, function(statusCode, surfaceForms){
         
         var candidateList = [];
-        if(surfaceForms.length != null){
-            for(var i = 0; i < surfaceForms.length; i++) {
-                for(var k = surfaceForms[i].resource.length - 1; k >= surfaceForms[i].resource.length - (Math.round(surfaceForms[i].resource.length * (surfaceForms.length/10))); k--){
-                    var candidate = surfaceForms[i].resource[k];
+        if(surfaceForms == null) {
+            callBack(candidateList);
+        } else {
+            if(surfaceForms.length != null){
+                for(var i = 0; i < surfaceForms.length; i++) {
+                    for(var k = surfaceForms[i].resource.length - 1; k >= surfaceForms[i].resource.length - (Math.round(surfaceForms[i].resource.length * (surfaceForms.length/10))); k--){
+                        var candidate = surfaceForms[i].resource[k];
+                        
+                        candidate.finalScore = parseFloat(Number(candidate.finalScore).toFixed(8));
+                        candidate.rank = surfaceForms[i].resource.length - k;//First rank is 1 not 0
+                        candidate.totalRank =  Math.round(surfaceForms[i].resource.length * (surfaceForms.length/10));
+                        candidate.EntityMentionID = entity.id;
+                        candidateList.push(candidate);
+                    }
+                }
+            } else {
+                var condition = surfaceForms.resource.length <= 8 ? 0:surfaceForms.resource.length-8;
+                var length = surfaceForms.resource.length;
+                for(var k = length - 1; k >= condition; k--){
+                    var candidate = surfaceForms.resource[k];
                     
                     candidate.finalScore = parseFloat(Number(candidate.finalScore).toFixed(8));
-                    candidate.rank = surfaceForms[i].resource.length - k;//First rank is 1 not 0
-                    candidate.totalRank =  Math.round(surfaceForms[i].resource.length * (surfaceForms.length/10));
+                    candidate.rank = length - k; //First rank is 1 not 0
+                    candidate.totalRank =  length - condition;
                     candidate.EntityMentionID = entity.id;
                     candidateList.push(candidate);
                 }
-            }
-        } else {
-            var condition = surfaceForms.resource.length <= 8 ? 0:surfaceForms.resource.length-8;
-            var length = surfaceForms.resource.length;
-            for(var k = length - 1; k >= condition; k--){
-                var candidate = surfaceForms.resource[k];
                 
-                candidate.finalScore = parseFloat(Number(candidate.finalScore).toFixed(8));
-                candidate.rank = length - k; //First rank is 1 not 0
-                candidate.totalRank =  length - condition;
-                candidate.EntityMentionID = entity.id;
-                candidateList.push(candidate);
             }
-            
-        }
-        callBack(candidateList);     
+            callBack(candidateList);  
+        }   
     });
 }
 
