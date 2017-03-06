@@ -2,3 +2,4 @@
 /ner-service/node_modules
 /topic-keyword-service/node_modules
 /contextclue-service/node_modules
+/candidategeneration-service/node_modules

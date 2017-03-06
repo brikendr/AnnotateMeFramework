@@ -57,6 +57,21 @@ connection.on('ready', function(){
                                         {contetnType: 'applicaton/json'}
                                     );
                                 });
+
+                                //Get entities by documentID and publish msg for candidate generation
+                                console.log('Publishing message to generate candidate entities!');
+                                entityController.findEntitiesByDocumentID(message, function(docEntities){
+                                    exchange.publish(
+                                        "extract.entity.candidates", 
+                                        {
+                                            'documentID'            : message.documentID, 
+                                            'entities'              : docEntities,
+                                            'confidence'            : message.confidence,
+                                            'support'               : message.support,
+                                        },  
+                                        {contetnType: 'applicaton/json'}
+                                    );
+                                });
                             });
                         }
                         else if(message.routeKey == 'createKeywords') {
@@ -70,8 +85,21 @@ connection.on('ready', function(){
                             entityController.createEntityCollocations(message, function(){
                                 console.log('Collocations have been persisted');
                             });
+                        } //TEMP 
+                        else if (message.routeKey == 'createEntityCandidates') {
+                            console.log("RECEIVED a message for entity candidate creation!");
+                            entityController.createEntityCandidates(message, function(){
+                                    exchange.publish(
+                                        "document.datageneration.done", 
+                                        {
+                                            'status' : 200,
+                                            'msg': 'All the data for the document has been generated!',
+                                            'documentID' : message.documentID, 
+                                        },  
+                                        {contetnType: 'applicaton/json'}
+                                    );
+                                }); 
                         }
-
                     });
                 });
             });

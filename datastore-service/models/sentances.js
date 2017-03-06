@@ -2,7 +2,7 @@
 
 module.exports = function(sequelize, DataTypes) {
     var Sentance = sequelize.define('Sentance', {
-        description: { type: DataTypes.STRING, allowNull: false},
+        description: { type: DataTypes.TEXT('long'), allowNull: false},
         start_index: DataTypes.INTEGER,
         end_index: DataTypes.INTEGER,
         tokens: DataTypes.STRING(500)
