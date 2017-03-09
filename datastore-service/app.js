@@ -9,6 +9,7 @@ var participants  = require('./routes/participants');
 var annotations   = require('./routes/annotations');
 var entityTypes   = require('./routes/entity_types');
 var entityMentions= require('./routes/entity_mentions');
+var BrookerInvoke= require('./routes/brooker_invoke_route');
 
 var app = express();
 
@@ -19,11 +20,12 @@ app.use(cookieParser());
 
 
 //USE the defined application routes.
-app.use('/docs', docs);
-app.use('/participants', participants);
-app.use('/annotations', annotations);
-app.use('/entitytypes', entityTypes);
-app.use('/entities', entityMentions);
+app.use('/docs', attachCORSOptions, docs);
+app.use('/participants', attachCORSOptions, participants);
+app.use('/annotations', attachCORSOptions, annotations);
+app.use('/entitytypes', attachCORSOptions, entityTypes);
+app.use('/entities', attachCORSOptions, entityMentions);
+app.use('/brookerInvoke', attachCORSOptions, BrookerInvoke);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -31,6 +33,16 @@ app.use(function(req, res, next) {
   err.status = 404;
   next(err);
 });
+
+//Middleware 
+
+function attachCORSOptions(req, res, next) {
+  res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();     
+}
+
 
 // error handler
 app.use(function(err, req, res, next) {

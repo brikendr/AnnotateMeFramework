@@ -378,12 +378,11 @@ router.delete('/:id/candidates/:candidateID?', function(req, res, next){
 
 //GET Annotations 
 router.get('/:id/annotations', function(req, res, next) {
-    models.EntityMention.find({
-        attributes: ['id', 'description', 'is_resolved'],
+    models.Annotation.findAll({
         where: {
-            id: req.params.id
+            EntityMentionID: req.params.id
         },
-        include: [models.Annotation]
+        include: [models.EntityMention, models.Participant, models.Candidate]
     }).then(function(result){
         if(!result){
             res.json({
