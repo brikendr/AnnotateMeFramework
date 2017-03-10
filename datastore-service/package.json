@@ -6,15 +6,16 @@
     "start": "nodemon ./bin/www | nodemon message_brookers/brooker.js"
   },
   "dependencies": {
+    "@brikendr/sequelize-models-annotateme": "^1.1.0",
+    "amqp": "^0.2.6",
     "body-parser": "~1.16.0",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.0",
     "express": "~4.14.1",
     "morgan": "~1.7.0",
+    "mysql": "^2.13.0",
     "sequelize": "^2.0.0-rc1",
     "sequelize-cli": "^2.5.1",
-    "sqlite3": "^3.1.8",
-    "mysql": "^2.13.0",
-    "amqp": "^0.2.6"
+    "sqlite3": "^3.1.8"
   }
 }

@@ -1,5 +1,5 @@
 var router      = require('express').Router();  
-var models      = require('../models');
+var models      = require('@brikendr/sequelize-models-annotateme/models');
 
 
 //GET ALL Annotations

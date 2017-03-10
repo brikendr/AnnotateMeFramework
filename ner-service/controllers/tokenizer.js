@@ -44,6 +44,15 @@ exports.mentionSelection = function(text, stanfordEntities, dbPediaEntities, onR
         var idx1 = text.indexOf(dbpediaEntity);
         var length1 = dbpediaEntity.length;
 
+        //If all the NER entities have been processed, and there are still more dbpedia entities, then we add them to the list!
+        if(nerEntities.length == 0){
+            newEntities.push({
+                "name": dbpediaEntity,
+                "index": idx1,
+                "length": length1
+            });
+        }
+
         loop2:
         for(var j = 0; j < nerEntities.length; j++) {
                 var stanfordEntity = nerEntities[j];
@@ -66,7 +75,7 @@ exports.mentionSelection = function(text, stanfordEntities, dbPediaEntities, onR
                         "index": idx1,
                         "length": length1
                     });
-                    //break loop2;
+                    break loop2;
                 } else if (idx == idx1 && idx+length2 == idx1+length1 && !checkForExistance(stanfordEntity, newEntities)) {
                     //Both have recognized the same entity, so we can take either of them
                     newEntities.push({
@@ -75,6 +84,14 @@ exports.mentionSelection = function(text, stanfordEntities, dbPediaEntities, onR
                         "length": length1
                     });
                     nerEntities.splice(j, 1);
+                    break loop2;
+                } else {
+                    //The DBpedia entity is unique from the NER entity, therefore we add it to the list 
+                    newEntities.push({
+                        "name": dbpediaEntity,
+                        "index": idx1,
+                        "length": length1
+                    });
                     break loop2;
                 }
             }
@@ -139,7 +156,6 @@ exports.mentionMerging = function(entities, tokens, callback) {
                 mergedEntities.push.apply(mergedEntities, entities.splice(i+1));
 
                 //Recursively call the function with the merged entities and whats left from original entity array
-                console.log('Calling recursive func 1');
                 return this.mentionMerging(mergedEntities, tokens, callback);
             }
             /* If there is one token between the entities and if those tokens are one of:
@@ -185,7 +201,7 @@ exports.mentionMerging = function(entities, tokens, callback) {
             mergedEntities.push(currentEntity);
         }
     }
-
+    
     //Return callback function with the merged entities
     callback(mergedEntities);
 };
@@ -198,11 +214,12 @@ exports.mentionMerging = function(entities, tokens, callback) {
 exports.mentionFiltering = function(entities, callback) {
     console.log("tokenizer::mentionFiltering");
     var filteredEntities = [];
-
+    
     loop1:
     for(var i = 0; i < entities.length; i++) {
         var words = new pos.Lexer().lex(entities[i].name);
         var taggedWords = tagger.tag(words);
+        loop2:
         for(var j=0; j < taggedWords.length; j++) {
             var tag = taggedWords[j][1];
             /*
@@ -212,12 +229,16 @@ exports.mentionFiltering = function(entities, callback) {
             * is not capital leter and if the word is a verb). 
             * If se we remove it from the list of entities 
             */
-            if(!/[A-Z]/.test(taggedWords[j][0][0]) && (tag == "VB" || tag == "VBD" || tag == "VBG" || tag == "VBN" || tag == "VBP" || tag == "VBZ"))
-                break loop1;
-        }
+            console.log('Tag, taggedWords[j][0][0]: ', tag, taggedWords[j][0][0], entities[i].name);
+            if(!/[A-Z]/.test(taggedWords[j][0][0])) {
+                if(tag == "VB" || tag == "VBD" || tag == "VBG" || tag == "VBN" || tag == "VBP" || tag == "VBZ") {
+                    break loop2;
+                }
+            }
 
-        //Append entity element to the filteredEntities array
-        filteredEntities.push(entities[i]);
+            //Append entity element to the filteredEntities array
+            filteredEntities.push(entities[i]);
+        }
     }
 
     //Return callback function with the filtered entities

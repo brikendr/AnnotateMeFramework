@@ -1,6 +1,6 @@
 var express     = require('express');
 var router      = express.Router();
-var models      = require('../models');
+var models      = require('@brikendr/sequelize-models-annotateme/models');
 var controller  = require('../controllers/document_controller');
 
 //GET all documents

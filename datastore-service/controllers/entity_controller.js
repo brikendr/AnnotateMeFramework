@@ -1,4 +1,4 @@
-var models      = require('../models');
+var models      = require('@brikendr/sequelize-models-annotateme/models');
 var async       = require('async');
 
 exports.findEntitiesByDocumentID = function(data, callBack){
