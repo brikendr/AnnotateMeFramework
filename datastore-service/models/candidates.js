@@ -3,7 +3,7 @@
 module.exports = function(sequelize, DataTypes) {
     var Candidate = sequelize.define('Candidate', {
         candidate_name: { type: DataTypes.STRING, allowNull: false},
-        description: { type: DataTypes.TEXT('long'), allowNull: false},
+        description: { type: DataTypes.TEXT('long') + ' CHARSET utf8 COLLATE utf8_unicode_ci', allowNull: false},
         schema_type: DataTypes.STRING,
         dbpediaURL: { type: DataTypes.STRING, allowNull: false},
         score: {type: DataTypes.FLOAT, allowNull: false},

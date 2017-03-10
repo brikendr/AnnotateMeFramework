@@ -1,9 +1,9 @@
 var amqp = require('amqp');
 
 
-exports.publishMessage = function(data){
-    console.log('Calling GET EXCHANGE!');
+exports.publishMessage = function(data, callback){
     var connection = amqp.createConnection({ host: process.env.RABBITMQ_HOST });
+
     connection.on('ready', function(){
         console.log('Connection Established! Ready to Emit');
         connection.exchange('Datastore', {type: 'topic', 'durable': false}, function(exchange) {
@@ -24,19 +24,33 @@ exports.publishMessage = function(data){
                 }, 
                 {contetnType: 'applicaton/json'}
             );
-            setTimeout(function () {
-                console.log('Connection will be closed now!');
-                // wait one second to receive the message, then quit
-                connection = null;
-            }, 2000);
+
+            connection.queue('randomQueue', {exclusive: true}, function (q) {
+                //Bind queue with the exchange
+                q.bind(exchange, 'document.datageneration.done', function() {
+                    console.log('ALL Services have been executed!')
+                    q.subscribe(function (message) {
+                        console.log('Distroying QUEUE');
+                        q.destroy();
+                        console.log('ENDING SOCKET');
+                        connection.end();
+                        console.log('DESTROYING SOCKET');
+                        connection.destroy();
+                        callback(true);
+                    });
+                });
+                
+            });
         });
         
-    });
-    connection.on('error', function(e) {
+    })     
+    .on('error', function(e) {
         console.log("Error from amqp: ", e);
-    });
-    connection.on('end', function() {
+        callback(false);
+    }).on('end', function() {
         console.log('Connection ENDED!');
+        callback(true);
     });
+    
 }
 

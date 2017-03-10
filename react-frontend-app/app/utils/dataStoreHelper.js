@@ -62,7 +62,20 @@ var DataStoreHelper = {
     invokeBrooker: function(data){
         return axios.post('http://localhost:8123/brookerInvoke', data)
         .then(function (response) {
+            console.log('Respose is ', response.data.msg);
             return response.data;
+        })
+        .catch(function (err) {
+            console.warn('Error in invokeBrooker: ', err);
+        });
+    },
+    registerParticipant: function(participant) {
+        return axios.post('http://localhost:8123/participants', 
+        {
+            'name': participant
+        })
+        .then(function (response) {
+            return response.data.resource;
         })
         .catch(function (err) {
             console.warn('Error in invokeBrooker: ', err);

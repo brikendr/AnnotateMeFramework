@@ -9,7 +9,8 @@ var participants  = require('./routes/participants');
 var annotations   = require('./routes/annotations');
 var entityTypes   = require('./routes/entity_types');
 var entityMentions= require('./routes/entity_mentions');
-var BrookerInvoke= require('./routes/brooker_invoke_route');
+var BrookerInvoke = require('./routes/brooker_invoke_route');
+var AnnotateMeAPI = require('./routes/annotate_me_api');
 
 var app = express();
 
@@ -26,6 +27,7 @@ app.use('/annotations', attachCORSOptions, annotations);
 app.use('/entitytypes', attachCORSOptions, entityTypes);
 app.use('/entities', attachCORSOptions, entityMentions);
 app.use('/brookerInvoke', attachCORSOptions, BrookerInvoke);
+app.use('/annotateme/api', attachCORSOptions, AnnotateMeAPI);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

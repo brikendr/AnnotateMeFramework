@@ -49,7 +49,7 @@ var associateCollocationsWithEntity = function(allEntities, collocations) {
         
         //Initialize collocation array for the entity
         entity.collocations = [];
-
+        
         //loop through each collocation 
         for(var j = 0; j < collocations.length; j++) {
             var collocation = collocations[j],
@@ -57,7 +57,7 @@ var associateCollocationsWithEntity = function(allEntities, collocations) {
                 collocatioOffset = collocation.endIDX;
 
             // If we have passed the preceeding collocations, before adding the next subsequent collocation we need to know the border
-            if(collocationIdx > entityEndIdx && !borderlineAssigned){
+            if(collocatioOffset > entityStartIdx && !borderlineAssigned){
                 // We are processing subsequent collocations now, the last element in array inserted is the borderline
                 entityCollocationBorderline = tempEntityCollocationArray.length;
                 borderlineAssigned = true;
@@ -73,9 +73,9 @@ var associateCollocationsWithEntity = function(allEntities, collocations) {
             */
             collocatioOffset < entityStartIdx ? preceedingBigrams++:subsequentBigrams++;
         }
-
+        
         if(subsequentBigrams >= 2 && preceedingBigrams >= 2) {
-
+            
             entity.collocations.push(tempEntityCollocationArray[entityCollocationBorderline-2]);
             entity.collocations.push(tempEntityCollocationArray[entityCollocationBorderline-1]);
             entity.collocations.push(tempEntityCollocationArray[entityCollocationBorderline]);
@@ -88,10 +88,11 @@ var associateCollocationsWithEntity = function(allEntities, collocations) {
             }
 
             for(var k = entityCollocationBorderline; k <= (2+(2-subsequentBigrams)); k++) {
-                if(k < tempEntityCollocationArray.length)
+                if(k < tempEntityCollocationArray.length){
                     entity.collocations.push(tempEntityCollocationArray[k]);
-                else 
+                } else {
                     break;
+                }
             }
             
         } 

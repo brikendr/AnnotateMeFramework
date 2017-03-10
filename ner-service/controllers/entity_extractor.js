@@ -49,7 +49,7 @@ exports.namedEntityExtractor = function(data, exchange, callBack){
             
             //Now we query DBPedia Annotator
             options = {
-                url: 'http://www.dbpedia-spotlight.com/en/spot',
+                url: 'http://www.dbpedia-spotlight.com/en/candidates',
                 form: {
                     text: textData,
                     confidence: confidence,
@@ -59,7 +59,7 @@ exports.namedEntityExtractor = function(data, exchange, callBack){
 
             //Call the method that extracts spots(surface forms) using DBpedia Spotlight 
             rest.postRequestJSON(options, function(statusCode, AnnotatorEntities){
-
+                console.log('Nr of dbpedia entities ', AnnotatorEntities.length);
                 //Execute the mention selection algorithm on both sets
                 tokenizer.mentionSelection(textData, NEREntities, AnnotatorEntities, function(selectedEntities){
                     

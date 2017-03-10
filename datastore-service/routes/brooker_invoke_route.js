@@ -1,15 +1,15 @@
 var express     = require('express');
 var router      = express.Router();
-
+var sendbrooker = require('../message_brookers/send_message');
 
 router.post('/', function(req, res, next){
     console.log('Invoing Brooker');
-    require('../message_brookers/send_message').publishMessage(req.body);
-        console.log('FINISHED');
+    sendbrooker.publishMessage(req.body, function(resolved){
         res.json({
             'status': 200,
-            'msg': 'Brooker Invoked!'
+            'msg': 'Document Data Generated Sucessfully!'
         });
+    });
 });
 
 

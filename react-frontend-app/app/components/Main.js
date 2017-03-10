@@ -1,13 +1,15 @@
 var React = require('react');
 var ReactCssTransitionGroup = require('react-addons-css-transition-group');
-require('../main.css');
-require('../styles/layout.css')
-require('../styles/components.css')
+var BackgroundPic = require('../assets/img/bg_01.jpg');
+
+require('../main.css');;
+require('../styles/layout.css');
+require('../styles/components.css');
 
 var Main = React.createClass({
   render: function () {
     return (
-      <div className='main-container'>
+      <div className='main-container' style={styles.imageBackground}>
         {<ReactCssTransitionGroup
           transitionName="appear"
           transitionEnterTimeout={500}
@@ -19,4 +21,12 @@ var Main = React.createClass({
   }
 });
 
+var styles = {
+  imageBackground: {
+    background: '#2f373e url('+BackgroundPic+') no-repeat',
+    backgroundPosition: 'center center',
+    backgroundSize: 'cover',
+    backgroundAttachment: 'fixed'
+  }
+}
 module.exports = Main;

@@ -21693,3 +21693,7 @@ Color library demo
   .mt-cookie-consent-bar.mt-cookie-consent-bar-light {
     background: rgba(238, 238, 238, 0.9);
     color: #333; }
+    .display-img-center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto }

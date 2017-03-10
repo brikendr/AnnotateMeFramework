@@ -538,7 +538,7 @@ html {
   /* Page fixed main content */
   .page-content .page-fixed-main-content {
     overflow: hidden;
-    margin-left: 255px; } }
+     } }
 
 /***
 Page sidebar
@@ -1414,3 +1414,11 @@ Quick Sidebar Layout
         margin-top: -4px; }
       .page-quick-sidebar-wrapper .page-quick-sidebar .page-quick-sidebar-settings .page-quick-sidebar-settings-list .list-items li select.form-control {
         padding: 4px 0px !important; }
+
+
+.showDisclaimer {
+  display: block;
+}
+.hideDisclaimer {
+  display: none;
+}

@@ -7,19 +7,25 @@ var IndexRoute = ReactRouter.IndexRoute;
 var Main = require('../components/Main');
 var Home = require("../components/Home");
 
+/*--------------------- START DEFINING ADMIN ROUTES --------------------------------*/
+var LoginContainer = require('../containers/Admin/LoginContainer');
+var Dashboard = require('../components/Admin/Dashboard');
+var DocumentListContainer = require('../containers/Admin/DocumentListContainer');
+var DocumentExploreContainer = require('../containers/Admin/DocumentExploreContainer');
+var SentanceListContainer = require('../containers/Admin/SentanceListContainer');
+var KeywordListContainer = require('../containers/Admin/KeywordListContainer');
+var EntityListContainer = require('../containers/Admin/EntityListContainer');
+var CollocationListContainer = require('../containers/Admin/CollocationListContainer');
+var CandidateListContainer = require('../containers/Admin/CandidateListContainer');
+var AnnotationsListContainer = require('../containers/Admin/AnnotationListContainer');
+var ParticipantListContainer = require('../containers/Admin/ParticipantListContainer');
+var NewDocumentContainer = require('../containers/Admin/NewDocumentContainer');
+/*------------------------ END OF ADMIN ROUTES --------------------------------------*/
 
-var LoginContainer = require('../containers/LoginContainer');
-var Dashboard = require('../components/Dashboard');
-var DocumentListContainer = require('../containers/DocumentListContainer');
-var DocumentExploreContainer = require('../containers/DocumentExploreContainer');
-var SentanceListContainer = require('../containers/SentanceListContainer');
-var KeywordListContainer = require('../containers/KeywordListContainer');
-var EntityListContainer = require('../containers/EntityListContainer');
-var CollocationListContainer = require('../containers/CollocationListContainer');
-var CandidateListContainer = require('../containers/CandidateListContainer');
-var AnnotationsListContainer = require('../containers/AnnotationListContainer');
-var ParticipantListContainer = require('../containers/ParticipantListContainer');
-var NewDocumentContainer = require('../containers/NewDocumentContainer');
+/*-------------------------- START ANNOTATEME ROUTES ---------------------------------*/
+var RegisterParticipantContainer = require('../containers/AnnotateMe/RegisterParticipantContainer');
+var AnnotateMeMainContainer = require('../containers/AnnotateMe/AnnotateMeMainContainer');
+/*--------------------------- END OF ANNOTATEME ROUTES ------------------------------*/
 
 var routes = (
   <Router history={hashHistory}>
@@ -37,6 +43,10 @@ var routes = (
       <Route path='/documents/:documentID/entityMentions/:entityID/annotations' component={AnnotationsListContainer} />
       <Route path='/participants' component={ParticipantListContainer} />
       <Route path='/newDocument' component={NewDocumentContainer} />
+
+      <Route path='/registerParticipant' component={RegisterParticipantContainer} />
+      <Route path='/annotationTask/:participantNR/view' component={AnnotateMeMainContainer} />
+      
     </Route>
   </Router>
 );

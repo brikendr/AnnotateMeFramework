@@ -13,7 +13,7 @@ var Home = React.createClass({
         <MainContainer>
           <div className="row">
               <div className="col-sm-6 col-sm-offset-3 margin-bottom-30">
-                  <Link className="webapp-btn" to="/startAnnotationTask">
+                  <Link className="webapp-btn" to="/registerParticipant">
                       <p className="text-center">Wecome to Annotate ME</p>
                       <h3 className="text-center">Start</h3>
                   </Link>
