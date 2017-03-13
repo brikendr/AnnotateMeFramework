@@ -1,0 +1,21 @@
+{
+  "name": "dataprep-service",
+  "version": "0.0.0",
+  "description": "This is the data preparation service which will have readonly access to the database for fetching the data needed for the annotateme interface and the game ",
+  "private": true,
+  "scripts": {
+    "start": "nodemon ./bin/www"
+  },
+  "dependencies": {
+    "@brikendr/sequelize-models-annotateme": "^1.1.0",
+    "body-parser": "~1.16.0",
+    "cookie-parser": "~1.4.3",
+    "debug": "~2.6.0",
+    "express": "~4.14.1",
+    "morgan": "~1.7.0",
+    "mysql": "^2.13.0",
+    "sequelize": "^2.0.0-rc1",
+    "sequelize-cli": "^2.5.1",
+    "sqlite3": "^3.1.8"
+  }
+}

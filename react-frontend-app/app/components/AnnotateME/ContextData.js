@@ -8,7 +8,7 @@ var Portlet = require('./Portlet');
 
 function mappCollocations(collocations) {
     const mappedCollocations = collocations.map(collocation => 
-        <li className="mt-list-item">
+        <li className="mt-list-item" key={collocation.id}>
             <div className="list-item-content">
                 <p data-tip={collocation.pos_json}>{collocation.collocation_json}</p> <ReactToolTip />
             </div>
@@ -18,10 +18,10 @@ function mappCollocations(collocations) {
 }
 
 function mappNeighborEntities(entities) {
-    const mappedEntities = entities.map(collocation => 
-        <li className="mt-list-item">
+    const mappedEntities = entities.map(entity => 
+        <li className="mt-list-item" key={entity.id}>
             <div className="list-item-content">
-                <p data-tip={collocation.pos_json}>{collocation.collocation_json}</p> <ReactToolTip />
+                <p>{entity.description}</p>
             </div>
         </li>
     );
@@ -29,10 +29,10 @@ function mappNeighborEntities(entities) {
 }
 
 function mappKeywords(keywords) {
-    const mappedKeywords = keywords.map(collocation => 
-        <li className="mt-list-item">
+    const mappedKeywords = keywords.map(keyword => 
+        <li className="mt-list-item" key={keyword.id}>
             <div className="list-item-content">
-                <p data-tip={collocation.pos_json}>{collocation.collocation_json}</p> <ReactToolTip />
+                <p>{keyword.keyword}</p> <ReactToolTip />
             </div>
         </li>
     );

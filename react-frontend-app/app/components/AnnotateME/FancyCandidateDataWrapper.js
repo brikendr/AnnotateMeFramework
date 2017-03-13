@@ -1,10 +1,11 @@
 var React = require('react');
 var PropTypes = React.PropTypes;
 var Collapse = require('react-collapse');
+var ReactToolTip = require('react-tooltip');
 
 var FancyCandidateDataWrapper = React.createClass({
     propTypes: {
-        candidate: PropTypes.string.isRequired,
+        candidate: PropTypes.object.isRequired,
         onSelectCandidate: PropTypes.func.isRequired
     },
     getInitialState: function() {
@@ -23,18 +24,16 @@ var FancyCandidateDataWrapper = React.createClass({
                 <div className="portlet-title">
                     <div className="caption">
                         <label className="mt-checkbox mt-checkbox-outline">
-                            <input type="checkbox" value="1" name="test" onChange={this.props.onSelectCandidate}/>
+                            <input type="checkbox" value="1" name="test" onChange={(e) => this.props.onSelectCandidate(this.props.candidate.id, e)}/>
                             <span></span>
                         </label>
-                        <span className="caption-subject bold font-white" style={{cursor: 'pointer'}} onClick={this.toggleCollapse}> Candidate 1 </span>
+                        <span className="caption-subject bold font-white" style={{cursor: 'pointer'}} onClick={this.toggleCollapse} data-tip={this.props.candidate.schema_type}> {this.props.candidate.candidate_name} </span> <ReactToolTip />
                     </div>
                 </div>
                 <Collapse isOpened={!this.state.collapsedContent}>
                     <div className="portlet-body">
-                        <p> Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras mattis consectetur purus sit amet fermentum. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget
-                            lacinia odio sem nec elit. Cras mattis consectetur purus sit amet fermentum. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras mattis consectetur purus sit amet
-                            fermentum. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras mattis consectetur purus sit amet fermentum. consectetur purus sit amet fermentum. Duis mollis, est
-                            non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras mattis consectetur purus sit amet fermentum. </p>
+                        <p> {this.props.candidate.description} </p>
+                        <a href={this.props.candidate.dbpediaURL} target="_blank" className="font-white">DBpedia Link</a>
                     </div>
                 </Collapse>
                 
@@ -42,4 +41,10 @@ var FancyCandidateDataWrapper = React.createClass({
         );
     }
 });
+
+var styles = {
+    thinPortlet: {
+        padding: '1px 0px 0px 3px !important'
+    }
+}
 module.exports = FancyCandidateDataWrapper;

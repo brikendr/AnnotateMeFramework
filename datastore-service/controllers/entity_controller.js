@@ -1,5 +1,6 @@
 var models      = require('@brikendr/sequelize-models-annotateme/models');
 var async       = require('async');
+var sequelize   = require('sequelize');
 
 exports.findEntitiesByDocumentID = function(data, callBack){
     models.EntityMention.findAll({
@@ -42,6 +43,49 @@ exports.createEntityCandidates = function(data, callBack){
 
     }, function(err) {
         callBack();
+    });
+}
+
+exports.triggerEntityResolution = function(entityID, callBack) {
+    models.Annotation.findAll({
+        where:{
+            EntityMentionId: entityID,
+            is_nil: {
+                $not: true
+            } 
+        },
+        attributes: ['CandidateId', `EntityMentionId`,[sequelize.fn('COUNT', sequelize.col('id')), 'nr_annotations']],
+        group: ['Annotation.CandidateId'],
+        order: [
+            [sequelize.fn('COUNT', sequelize.col('id')), 'DESC'],
+        ],
+        limit: 1
+    }).then(function(result){
+        var data = result[0].dataValues;
+        if(data.nr_annotations >= 4) {
+            resolveEntity(data.EntityMentionId, data.CandidateId);
+            callBack();
+        }
+    });
+}
+
+var resolveEntity = function(entityID, candidateID) {
+    models.EntityMention.update({
+        is_resolved: true
+    },
+    {
+        where: {
+            id: entityID
+        }
+    }).then(function(updated){
+        models.Candidate.update({
+            is_correct: true
+        },
+        {
+            where: {
+                id: candidateID
+            }
+        });
     });
 }
 

@@ -1,5 +1,6 @@
 var router      = require('express').Router();  
 var models      = require('@brikendr/sequelize-models-annotateme/models');
+var controller  = require('../controllers/entity_controller');
 
 
 //GET ALL Annotations
@@ -39,12 +40,14 @@ router.post('/', function(req, res, next){
         CandidateId: req.body.candidateId,
         timespan: Date.now()
     }).then(function(result){
-        //Return Response
-        res.json({
-            "status": 201,
-            "resource": result,
-            "resourceLink": "/participants/"+req.params.id+"/annotations/"+result.id,
-            "parentLink": "/participants/"+req.params.id
+        controller.triggerEntityResolution(req.body.entityId, function(){
+            //Return Response
+            res.json({
+                "status": 201,
+                "resource": result,
+                "resourceLink": "/participants/"+req.params.id+"/annotations/"+result.id,
+                "parentLink": "/participants/"+req.params.id
+            });
         });
     });
 });

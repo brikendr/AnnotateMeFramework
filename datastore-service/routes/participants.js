@@ -46,7 +46,8 @@ router.post('/', function(req, res, next){
 });
 
 //UPDATE annotation startime
-router.put('/:id/updateStartTime', function(req, res, next){
+router.post('/:id/updateStartTime', function(req, res, next){
+    console.log('Updating participant');
     models.Participant.update({
         start_timespan: Date.now()
     }, {
@@ -54,6 +55,7 @@ router.put('/:id/updateStartTime', function(req, res, next){
             id: req.params.id
         }
     }).then(function(updated){
+        console.log("Participant updated", updated);
         if(updated == 0) {
             res.json({
                 "status": 404,
@@ -70,7 +72,7 @@ router.put('/:id/updateStartTime', function(req, res, next){
 });
 
 //UPDATE annotation endTime
-router.put('/:id/updateEndTime', function(req, res, next){
+router.post('/:id/updateEndTime', function(req, res, next){
     models.Participant.update({
         end_timespan: Date.now()
     }, {

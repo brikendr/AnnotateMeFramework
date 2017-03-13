@@ -10,26 +10,82 @@ var CandidateData = require('../../components/AnnotateME/CandidateData');
 var AnnotateMeFooter = require('../../components/AnnotateME/AnnotateMeFooter');
 
 var AnnotateMeMainContainer = React.createClass({
+    contextTypes: {
+        router: React.PropTypes.object.isRequired
+    },
     getInitialState: function() {
         return {
-            isFetching: false,
+            isFetching: true,
+            participantID: null,
             collocations: [],
             neighborEntities: [],
             keywords: [],
             candidates: [],
-            main_entity: null,
+            selected_entity: null,
             nr_annotations: 0,
             footerPreview: false,
+            annotatedEntities: []
         }
     },
-    handleCandidateSelection: function(e){
-        console.log('Handeling candidate selection!');
+    componentDidMount: function() {
+        //TODO: Update participant start timestamp!
+        var player = this.props.routeParams.participantNR;
+        this.setState({
+            participantID: player
+        });
+        
+        DataStoreHelper.updateParticipantStartTime(player);
+        this.fetchDataFromService();
+    },
+    fetchDataFromService: function(){
+        //Fetch all the necessary data from the DataPrep-Service 
+        DataStoreHelper.fetchDataForAnnotateMe(this.state.annotatedEntities)
+        .then(function(response){
+            if(response == null) {
+                this.setState({
+                    isFetching: false,
+                    collocations: [],
+                    neighborEntities: [],
+                    keywords: [],
+                    candidates: [],
+                    selected_entity: null,
+                });
+                return;
+            }
+            this.setState({
+                selected_entity: response.entity,
+                collocations: response.collocations,
+                neighborEntities: response.neighborEntities,
+                keywords: response.docKeywords,
+                candidates: response.candidates,
+                isFetching: false
+            });
+        }.bind(this));
+    },
+    handleCandidateSelection: function(candidateID, e){
+        console.log('NR OF ANNOTATIONS ',this.state.nr_annotations, Date.now());
+        DataStoreHelper.annotateEntity(candidateID, this.state.selected_entity.id, this.state.participantID)
+        .then(function(response){
+            this.setState({
+                annotatedEntities: [...this.state.annotatedEntities, this.state.selected_entity.id],
+                nr_annotations: this.state.nr_annotations + 1,
+                isFetching: true
+            });
+            this.fetchDataFromService();
+        }.bind(this));
     },
     handleOnToggleFooter: function(){
-        console.log('Setting disclaimer');
         this.setState({
             footerPreview: !this.state.footerPreview
         });
+    },
+    handleOnFinishExperiment: function() {
+        //Update Participant End time 
+    DataStoreHelper.updateParticipantEndTime(this.state.participantID)
+    .then(function(response){
+        //Send to final view 
+        this.context.router.push('/annotationTask/finalizeExperiment');
+    }.bind(this));
     },
     render: function(){
         return (
@@ -48,7 +104,7 @@ var AnnotateMeMainContainer = React.createClass({
                                         neighborEntities={this.state.neighborEntities}
                                         keywords={this.state.keywords} />
 
-                                    <MainEntityData entityName={"Barack Obama"} annotatedEntities={this.state.nr_annotations + 1} />
+                                    <MainEntityData entityObject={this.state.selected_entity} annotatedEntities={this.state.nr_annotations + 1} />
                                     
                                     <CandidateData 
                                         candidates={this.state.candidates}
@@ -68,7 +124,7 @@ var AnnotateMeMainContainer = React.createClass({
                         </p>
                     </div>
                     <div className="col-md-3 pull-right">
-                        <button type="button" className="btn btn-lg white uppercase pull-right font-red-mint">Finish</button>
+                        <button type="button" onClick={this.handleOnFinishExperiment} className="btn btn-lg white uppercase pull-right font-red-mint margin-right-10">Finish</button>
                     </div>
                 </AnnotateMeFooter>
             </div>

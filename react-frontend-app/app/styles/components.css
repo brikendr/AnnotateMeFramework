@@ -6815,7 +6815,7 @@ Portlets
 /* Basic portlet */
 .portlet {
   margin-top: 0px;
-  margin-bottom: 25px;
+  margin-bottom: 0px;
   padding: 0px;
   -webkit-border-radius: 2px;
   -moz-border-radius: 2px;
@@ -7062,7 +7062,8 @@ Portlets
 
 /* Light Portlet */
 .portlet.light {
-  padding: 12px 20px 15px 20px;
+  /*padding: 12px 20px 15px 20px;*/
+  padding: 1px 0px 0px 3px;
   background-color: #fff; }
   .portlet.light.bordered {
     border: 1px solid #e7ecf1 !important; }
@@ -14503,6 +14504,12 @@ Tasks Widget
   margin: auto;
   padding: 3px 14px;
   margin-bottom: 20px; }
+  .mt-element-step .step-default .mt-step-number-custom {
+  font-size: 15px;
+  border-radius: 50% !important;
+  display: inline-block;
+  margin: auto;
+  padding: 2px 8px; }
 
 .mt-element-step .step-default .mt-step-title {
   font-size: 30px;
@@ -14882,7 +14889,7 @@ Tasks Widget
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
-  padding: 15px; }
+  padding: 5px; }
   .mt-element-list .list-default.mt-list-head .list-title {
     margin: 0 0 0.7em 0;
     font-size: 18px; }
@@ -14943,8 +14950,7 @@ Tasks Widget
             .mt-element-list .list-default.mt-list-container ul > .mt-list-item > .list-icon-container.done > a:hover {
               color: #26C281;
               text-decoration: none; }
-      .mt-element-list .list-default.mt-list-container ul > .mt-list-item > .list-item-content {
-        padding: 0 75px 0 60px; }
+        
         .mt-element-list .list-default.mt-list-container ul > .mt-list-item > .list-item-content > h3 {
           margin-top: 0;
           margin-bottom: 5px;
@@ -14955,7 +14961,7 @@ Tasks Widget
               color: #26C281;
               text-decoration: none; }
         .mt-element-list .list-default.mt-list-container ul > .mt-list-item > .list-item-content > p {
-          margin: 0; }
+          margin: 0; font-size: 8pt; }
       .mt-element-list .list-default.mt-list-container ul > .mt-list-item > .list-datetime {
         text-align: right;
         float: right;
@@ -14984,10 +14990,11 @@ Tasks Widget
   text-decoration: none; }
 
 .mt-element-list .list-default.group .list-toggle-container .list-toggle {
-  padding: 15px;
+  padding: 8px;
   background-color: #2F353B;
   font-weight: 700;
   color: #fff;
+  font-size: 10pt;
   text-decoration: none; }
   .mt-element-list .list-default.group .list-toggle-container .list-toggle.done {
     background-color: #26C281; }

@@ -25,6 +25,7 @@ var NewDocumentContainer = require('../containers/Admin/NewDocumentContainer');
 /*-------------------------- START ANNOTATEME ROUTES ---------------------------------*/
 var RegisterParticipantContainer = require('../containers/AnnotateMe/RegisterParticipantContainer');
 var AnnotateMeMainContainer = require('../containers/AnnotateMe/AnnotateMeMainContainer');
+var FinalExperimentContainer = require('../containers/AnnotateMe/FinalExperimentContainer');
 /*--------------------------- END OF ANNOTATEME ROUTES ------------------------------*/
 
 var routes = (
@@ -46,6 +47,7 @@ var routes = (
 
       <Route path='/registerParticipant' component={RegisterParticipantContainer} />
       <Route path='/annotationTask/:participantNR/view' component={AnnotateMeMainContainer} />
+      <Route path='/annotationTask/finalizeExperiment' component={FinalExperimentContainer} />
       
     </Route>
   </Router>

@@ -28,7 +28,7 @@ AnnotateMeFooter.propTypes = {
 
 var footerStyles = {
     container: {
-        position: 'absolute',
+        position: 'fixed',
         bottom: 0,
         margin: '0 auto'
     },
