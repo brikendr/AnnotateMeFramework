@@ -25,7 +25,7 @@ var NewDocumentContainer = React.createClass({
         DatastoreHelper.invokeBrooker(this.state)
         .then(function(response) {
             if(response.status == 200) {
-                console.log('brooker invoked');return;
+                console.log('brooker invoked');
                 this.context.router.push('/documents');
             } else {
                 console.warn(response.msg);

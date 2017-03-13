@@ -219,6 +219,7 @@ exports.mentionFiltering = function(entities, callback) {
     for(var i = 0; i < entities.length; i++) {
         var words = new pos.Lexer().lex(entities[i].name);
         var taggedWords = tagger.tag(words);
+        var filteredEntityName = "";
         loop2:
         for(var j=0; j < taggedWords.length; j++) {
             var tag = taggedWords[j][1];
@@ -229,14 +230,17 @@ exports.mentionFiltering = function(entities, callback) {
             * is not capital leter and if the word is a verb). 
             * If se we remove it from the list of entities 
             */
-            console.log('Tag, taggedWords[j][0][0]: ', tag, taggedWords[j][0][0], entities[i].name);
-            if(!/[A-Z]/.test(taggedWords[j][0][0])) {
-                if(tag == "VB" || tag == "VBD" || tag == "VBG" || tag == "VBN" || tag == "VBP" || tag == "VBZ") {
-                    break loop2;
-                }
+            if(tag == "CD" || (/[A-Z]/.test(taggedWords[j][0][0]) && ["VB","VBD","VBG","VBN","VBP","VBZ", "IN"].indexOf(tag) == -1)) {
+                if (tag == "CD")
+                    filteredEntityName = filteredEntityName.concat(taggedWords[j][0]); 
+                else
+                    filteredEntityName = filteredEntityName.concat(' '+taggedWords[j][0]); 
             }
+        }
 
-            //Append entity element to the filteredEntities array
+        //Append entity element to the filteredEntities array
+        if(filteredEntityName.trim() != "" && !checkForExistance(filteredEntityName, filteredEntities)) {
+            entities[i].name = filteredEntityName;
             filteredEntities.push(entities[i]);
         }
     }

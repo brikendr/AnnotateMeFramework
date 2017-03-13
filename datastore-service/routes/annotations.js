@@ -40,14 +40,14 @@ router.post('/', function(req, res, next){
         CandidateId: req.body.candidateId,
         timespan: Date.now()
     }).then(function(result){
-        controller.triggerEntityResolution(req.body.entityId, function(){
-            //Return Response
-            res.json({
-                "status": 201,
-                "resource": result,
-                "resourceLink": "/participants/"+req.params.id+"/annotations/"+result.id,
-                "parentLink": "/participants/"+req.params.id
-            });
+        controller.triggerEntityResolution(req.body.entityId);
+        //Return Response
+        console.log('RETURNING RESPONSE!');
+        res.json({
+            "status": 201,
+            "resource": result,
+            "resourceLink": "/participants/"+req.params.id+"/annotations/"+result.id,
+            "parentLink": "/participants/"+req.params.id
         });
     });
 });

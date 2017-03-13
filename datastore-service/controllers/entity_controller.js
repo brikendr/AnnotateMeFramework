@@ -46,7 +46,7 @@ exports.createEntityCandidates = function(data, callBack){
     });
 }
 
-exports.triggerEntityResolution = function(entityID, callBack) {
+exports.triggerEntityResolution = function(entityID) {
     models.Annotation.findAll({
         where:{
             EntityMentionId: entityID,
@@ -64,7 +64,6 @@ exports.triggerEntityResolution = function(entityID, callBack) {
         var data = result[0].dataValues;
         if(data.nr_annotations >= 4) {
             resolveEntity(data.EntityMentionId, data.CandidateId);
-            callBack();
         }
     });
 }

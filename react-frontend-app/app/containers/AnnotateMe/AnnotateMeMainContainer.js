@@ -38,6 +38,7 @@ var AnnotateMeMainContainer = React.createClass({
         this.fetchDataFromService();
     },
     fetchDataFromService: function(){
+        console.log('Fetching data');
         //Fetch all the necessary data from the DataPrep-Service 
         DataStoreHelper.fetchDataForAnnotateMe(this.state.annotatedEntities)
         .then(function(response){
@@ -66,6 +67,7 @@ var AnnotateMeMainContainer = React.createClass({
         console.log('NR OF ANNOTATIONS ',this.state.nr_annotations, Date.now());
         DataStoreHelper.annotateEntity(candidateID, this.state.selected_entity.id, this.state.participantID)
         .then(function(response){
+            console.log('RESPONSE IS: ', response);
             this.setState({
                 annotatedEntities: [...this.state.annotatedEntities, this.state.selected_entity.id],
                 nr_annotations: this.state.nr_annotations + 1,
@@ -81,11 +83,11 @@ var AnnotateMeMainContainer = React.createClass({
     },
     handleOnFinishExperiment: function() {
         //Update Participant End time 
-    DataStoreHelper.updateParticipantEndTime(this.state.participantID)
-    .then(function(response){
-        //Send to final view 
-        this.context.router.push('/annotationTask/finalizeExperiment');
-    }.bind(this));
+        DataStoreHelper.updateParticipantEndTime(this.state.participantID)
+        .then(function(response){
+            //Send to final view 
+            this.context.router.push('/annotationTask/finalizeExperiment');
+        }.bind(this));
     },
     render: function(){
         return (
