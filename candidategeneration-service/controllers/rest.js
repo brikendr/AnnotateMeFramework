@@ -37,8 +37,14 @@ exports.getRequestJSON = function(options, onResult){
             candidateData = JSON.parse(body).results[0];
             onResult(httpResponse.statusCode, candidateData);
         } catch (e) {
-            console.log(e);
+            try {
+                candidateData = JSON.parse(body).results;
+                onResult(httpResponse.statusCode, candidateData);
+            } catch(e2) {
+                console.log(e);
             onResult(null);
+            }
+            
         }
         
     });

@@ -122,7 +122,7 @@ var queryDBPediaLookup = function(candidate, callBack) {
         if(candidateData == null) {
             callBack();
         } else {
-            newCandidate.description = utf8.encode(candidateData.description);
+            newCandidate.description = candidateData.description != null ? utf8.encode(candidateData.description):"";
             newCandidate.dbpediaURI = candidateData.uri;
             newCandidate.categories = candidateData.categories;
             callBack(newCandidate);

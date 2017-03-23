@@ -20,6 +20,7 @@ exports.prepareTaskData = function(reqData, callBack){
         }
         //3. Get the length of the entity list and generate a random number from zero to arraylist.length 
         var randomIDX = entities.length > 1 ? Math.floor(Math.random() * entities.length): 0;
+        //var randomIDX = entities[randomIDX];
         console.log('randomIDX = ',randomIDX);
 
         //4. The random number will be the index of the entity that will be taken for evaluation 
@@ -57,6 +58,41 @@ exports.prepareTaskData = function(reqData, callBack){
             
         });
             
+    });
+}
+
+exports.prepareNILEntity = function(reqData, callBack){
+    console.log('PREPARE NIL');
+    models.EntityMention.find({
+        where: {
+            id: 231,
+        }
+    }).then(function(entityMention){
+        //Get Collocations
+        getEntityCollocations(entityMention, function(collocations){    
+            //7. Using entity id from 4, get all candidates of the entity mention (Select the first 2-3 schema types and not all of them!)
+            getEntityCandidates(entityMention, function(candidates){
+                //8. After having fetched the candidates, shuffle the list so that it is randomly presented to the user 
+                shuffleCandidateList(candidates, function(shuffeledCandidateList){
+                    filterCandidateTypes(shuffeledCandidateList, function(entityCandidates){
+                        //9. Using documentID from the selected entity, get all the topic keywords
+                        getDocumentKeywords(entityMention, function(keywords){
+                            //10. Create a json object and return all the extracted data from 4-9.
+                            var finalResult = {
+                                'entity': entityMention,
+                                'neighborEntities': [],
+                                'collocations': collocations,
+                                'candidates': entityCandidates,
+                                'docKeywords': keywords
+                            }
+
+                            callBack(finalResult);
+                        });
+                    });
+                    
+                })
+            });
+        });
     });
 }
 

@@ -21,6 +21,7 @@ var AnnotateMeMainContainer = React.createClass({
             neighborEntities: [],
             keywords: [],
             candidates: [],
+            expandedCandidate: null,
             selected_entity: null,
             nr_annotations: 0,
             footerPreview: false,
@@ -38,9 +39,8 @@ var AnnotateMeMainContainer = React.createClass({
         this.fetchDataFromService();
     },
     fetchDataFromService: function(){
-        console.log('Fetching data');
         //Fetch all the necessary data from the DataPrep-Service 
-        DataStoreHelper.fetchDataForAnnotateMe(this.state.annotatedEntities)
+        DataStoreHelper.fetchDataForAnnotateMe(this.state.annotatedEntities, this.state.nr_annotations)
         .then(function(response){
             if(response == null) {
                 this.setState({
@@ -53,6 +53,11 @@ var AnnotateMeMainContainer = React.createClass({
                 });
                 return;
             }
+            //Loop through candidates and set collapsed to true 
+            for(var i=0; i < response.candidates.length; i++){
+                response.candidates[i].isCollapsed = true;
+            }
+
             this.setState({
                 selected_entity: response.entity,
                 collocations: response.collocations,
@@ -61,15 +66,17 @@ var AnnotateMeMainContainer = React.createClass({
                 candidates: response.candidates,
                 isFetching: false
             });
+
+            
         }.bind(this));
     },
     handleCandidateSelection: function(candidateID, e){
-        console.log('NR OF ANNOTATIONS ',this.state.nr_annotations, Date.now());
         DataStoreHelper.annotateEntity(candidateID, this.state.selected_entity.id, this.state.participantID)
         .then(function(response){
-            console.log('RESPONSE IS: ', response);
+            var filteredEntities = this.state.annotatedEntities;
+            filteredEntities.push(this.state.selected_entity.id);
             this.setState({
-                annotatedEntities: [...this.state.annotatedEntities, this.state.selected_entity.id],
+                annotatedEntities: filteredEntities,
                 nr_annotations: this.state.nr_annotations + 1,
                 isFetching: true
             });
@@ -81,6 +88,20 @@ var AnnotateMeMainContainer = React.createClass({
             footerPreview: !this.state.footerPreview
         });
     },
+    handleToggleCollapseCandidate: function(candidateID, e){
+        for(var i=0; i < this.state.candidates.length; i++){
+            if(this.state.candidates[i].id == candidateID && this.state.candidates[i].isCollapsed != false) {
+                this.state.candidates[i].isCollapsed = false;
+            } else {
+                this.state.candidates[i].isCollapsed = true;
+            }
+        }
+
+        this.setState({
+            expandedCandidate: candidateID
+        });
+
+    },
     handleOnFinishExperiment: function() {
         //Update Participant End time 
         DataStoreHelper.updateParticipantEndTime(this.state.participantID)
@@ -88,6 +109,16 @@ var AnnotateMeMainContainer = React.createClass({
             //Send to final view 
             this.context.router.push('/annotationTask/finalizeExperiment');
         }.bind(this));
+    },
+    handleSkipAnnotation: function() {
+        //Skip to next Element
+        var filteredEntities = this.state.annotatedEntities;
+        filteredEntities.push(this.state.selected_entity.id);
+        this.setState({
+            annotatedEntities: filteredEntities
+        });
+
+        this.fetchDataFromService();
     },
     render: function(){
         return (
@@ -110,7 +141,9 @@ var AnnotateMeMainContainer = React.createClass({
                                     
                                     <CandidateData 
                                         candidates={this.state.candidates}
-                                        onSelectCandidate={this.handleCandidateSelection}/>
+                                        onSelectCandidate={this.handleCandidateSelection}
+                                        onSkipAnnotation={this.handleSkipAnnotation}
+                                        onToggleCollapseCandidate={this.handleToggleCollapseCandidate}/>
                                 </div>
                                 }
                                 

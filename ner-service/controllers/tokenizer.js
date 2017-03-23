@@ -31,7 +31,7 @@ exports.mentionSelection = function(text, stanfordEntities, dbPediaEntities, onR
     var newEntities = [];
     // Loop through entities recognized by Stanford NER
     for (var key in stanfordEntities) {
-        if(key != 'DATE'){
+        if(key != 'DATE' && key != 'TIME'){
             nerEntities.push.apply(nerEntities, stanfordEntities[key]);
         }
     }
@@ -230,7 +230,7 @@ exports.mentionFiltering = function(entities, callback) {
             * is not capital leter and if the word is a verb). 
             * If se we remove it from the list of entities 
             */
-            if(tag == "CD" || (/[A-Z]/.test(taggedWords[j][0][0]) && ["VB","VBD","VBG","VBN","VBP","VBZ", "IN"].indexOf(tag) == -1)) {
+            if(tag == "CD" || (/[A-Z]/.test(taggedWords[j][0][0]) && ["NN","NNP","NNPS","NNS","POS", "FW", "VB", "VBD", "VBP"].indexOf(tag) != -1)) {
                 if (tag == "CD")
                     filteredEntityName = filteredEntityName.concat(taggedWords[j][0]); 
                 else

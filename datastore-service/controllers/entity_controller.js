@@ -49,10 +49,7 @@ exports.createEntityCandidates = function(data, callBack){
 exports.triggerEntityResolution = function(entityID) {
     models.Annotation.findAll({
         where:{
-            EntityMentionId: entityID,
-            is_nil: {
-                $not: true
-            } 
+            EntityMentionId: entityID
         },
         attributes: ['CandidateId', `EntityMentionId`,[sequelize.fn('COUNT', sequelize.col('id')), 'nr_annotations']],
         group: ['Annotation.CandidateId'],
@@ -61,9 +58,11 @@ exports.triggerEntityResolution = function(entityID) {
         ],
         limit: 1
     }).then(function(result){
-        var data = result[0].dataValues;
-        if(data.nr_annotations >= 4) {
-            resolveEntity(data.EntityMentionId, data.CandidateId);
+        if(result[0] != null) {
+            var data = result[0].dataValues;
+            if(data.nr_annotations >= 4) {
+                resolveEntity(data.EntityMentionId, data.CandidateId);
+            }
         }
     });
 }

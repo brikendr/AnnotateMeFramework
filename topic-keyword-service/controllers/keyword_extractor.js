@@ -10,10 +10,16 @@ exports.extractKeywords = function(data, callBack) {
     nrOfConcepts = data.nrConceptsToExtract;
     
     alchemy.keywords(textData, {}, function(err, response) {
-        if (err) throw err;
+        if (err){
+            console.log('ERROR:',err);
+            return;
+        }
         var keywords = response.keywords;
         alchemy.concepts(textData, {}, function(err, response) {
-            if (err) throw err;
+            if (err){
+                console.log('ERROR:',err);
+                return;
+            }
             
             var concepts = response.concepts;
             

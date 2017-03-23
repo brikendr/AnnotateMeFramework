@@ -3,13 +3,15 @@ var PropTypes = React.PropTypes;
 var Portlet = require('./Portlet');
 var FancyCandidateDataWrapper = require('./FancyCandidateDataWrapper');
 var NILComponent = require('./NilCandidateComponent');
+var SkipElement = require('./SkipElement');
 
 function mapCandidates(candidates, props) {
     const mappedCandidates = candidates.map(candidate => 
         <FancyCandidateDataWrapper 
             key={candidate.id}
             candidate={candidate}
-            onSelectCandidate={props.onSelectCandidate}/>
+            onSelectCandidate={props.onSelectCandidate}
+            onToggleCollapseCandidate={props.onToggleCollapseCandidate}/>
     );
     return mappedCandidates;
 }
@@ -17,7 +19,7 @@ function mapCandidates(candidates, props) {
 function CandidateData(props) {
     let candidates = mapCandidates(props.candidates, props);
     let NilComponent = props.candidates.length > 0 ? <NILComponent onSelectCandidate={props.onSelectCandidate}/> : "";
-
+    let Skip  = <SkipElement onSkipAnnotation={props.onSkipAnnotation} />
     return (
         <Portlet size={3} bordered="bordered">
             <div className="mt-element-list">
@@ -27,7 +29,8 @@ function CandidateData(props) {
                     </div>
                 </div>
                 {candidates}
-                {NilComponent}
+                {NilComponent} 
+                {Skip}
             </div>
         </Portlet>
         
@@ -36,7 +39,9 @@ function CandidateData(props) {
 
 CandidateData.propTypes = {
     candidates: PropTypes.array.isRequired,
-    onSelectCandidate: PropTypes.func.isRequired
+    onToggleCollapseCandidate: PropTypes.func.isRequired,
+    onSelectCandidate: PropTypes.func.isRequired,
+    onSkipAnnotation: PropTypes.func.isRequired
 }
 
 module.exports = CandidateData;

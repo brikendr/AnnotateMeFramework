@@ -14,4 +14,15 @@ router.post('/getTaskData', function(req, res, next) {
     });
 });
 
+router.post('/getNILEntity', function(req, res, next){
+    console.log("post:GETNilENTITY");
+    annotateMeAPIController.prepareNILEntity(req.body, function(taskData){
+        res.json({
+            'status': 200,
+            'msg': 'Task Data Fetched',
+            'resource': taskData
+        });
+    });
+})
+
 module.exports = router

@@ -3,6 +3,7 @@ var Navbar = require('../../components/Navbar');
 var AdminMainComponent = require('../../components/Admin/AdminMainComponent');
 var NewDocumentForm = require('../../components/Admin/NewDocumentForm');
 var DatastoreHelper = require('../../utils/dataStoreHelper');
+var utf8 = require('utf8');
 
 var NewDocumentContainer = React.createClass({
     contextTypes: {
@@ -38,7 +39,7 @@ var NewDocumentContainer = React.createClass({
             const [e, file] = result;
             var previousTxt = this.state.text;
             this.setState({
-                text: previousTxt.concat(e.target.result)
+                text: previousTxt.concat(utf8.decode(e.target.result))
             });
         });
     },

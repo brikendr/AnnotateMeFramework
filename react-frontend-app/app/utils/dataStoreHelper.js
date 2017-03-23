@@ -81,7 +81,12 @@ var DataStoreHelper = {
             console.warn('Error in invokeBrooker: ', err);
         });
     },
-    fetchDataForAnnotateMe: function(annotatedEntities){
+    fetchDataForAnnotateMe: function(annotatedEntities, nr_annotations){
+        //If participant has reached 5 anntations, show the NIL (for quality assurance)
+        console.log("NR ENTITIES IS ", nr_annotations);
+        if(nr_annotations == 6) {
+            return this.fetchNILEntity();
+        }
         return axios({
                 method: 'post',
                 url: 'http://localhost:8128/annotateme/api/getTaskData',
@@ -94,12 +99,22 @@ var DataStoreHelper = {
         })
         .catch(function (err) { console.warn('Error in fetchDataForAnnotateMe: ', err)});
     },
+    fetchNILEntity: function(){
+        return axios({
+                method: 'post',
+                url: 'http://localhost:8128/annotateme/api/getNILEntity'
+        })
+        .then(function(response){
+            return response.data.resource;
+        })
+        .catch(function (err) { console.warn('Error in fetchDataForAnnotateMe: ', err)});
+    },
     annotateEntity: function(candidateID,entityId, participantID) {
         var data = {
-            'isNil': candidateID != null ? false:true,
+            'isNil': candidateID == "NIL" ? true:false,
             'entityId': entityId,
             'participantId': participantID,
-            'candidateId': candidateID,
+            'candidateId': candidateID == "NIL" ? null:candidateID,
         }
         return axios.post('http://localhost:8123/annotations', data)
         .then(function (response) {

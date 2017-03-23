@@ -10,11 +10,27 @@ function mappCollocations(collocations) {
     const mappedCollocations = collocations.map(collocation => 
         <li className="mt-list-item" key={collocation.id}>
             <div className="list-item-content">
-                <p data-tip={collocation.pos_json}>{collocation.collocation_json}</p> <ReactToolTip />
+                <p data-tip={decodePOSTag(collocation.pos_json)}>{collocation.collocation_json}</p> <ReactToolTip />
             </div>
         </li>
     );
     return mappedCollocations;
+}
+
+function decodePOSTag(pos_combo){
+    var posTag = pos_combo.split("_");
+    return filterPOS(posTag[0]) + "_" + filterPOS(posTag[1]);
+}
+
+function filterPOS(posTag){
+    if(posTag == 'JJ' || posTag == 'JJR' || posTag == 'JJS'){
+        return "ADJECTIVE"
+    }
+    else if(posTag == 'NN' || posTag == 'NNP' || posTag == 'NNPS' || posTag == 'NNS'){
+        return "NOUN"
+    } else if(posTag == 'VBZ' || posTag == 'VBP' || posTag == 'VBG' || posTag == 'VBD' || posTag == 'FW') {
+        return "VERB"
+    }
 }
 
 function mappNeighborEntities(entities) {

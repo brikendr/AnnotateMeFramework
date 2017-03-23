@@ -4,6 +4,7 @@ var Loading = require('../Loading');
 var NoteMessage = require('./NoteMessage');
 var Datatable = require('./Datatable');
 var ReactToolTip = require('react-tooltip');
+var Utf8 = require('utf8');
 
 function CandidateList(props) {
     //Map candidates 
@@ -11,7 +12,7 @@ function CandidateList(props) {
         <tr className="odd gradeX" key={candidate.id}>
             <td> {candidate.id} </td>
             <td> {candidate.candidate_name} </td>
-            <td> {candidate.description}</td>
+            <td> {Utf8.decode(candidate.description)}</td>
             <td> {candidate.schema_type} </td>
             <td> <a target="_blank" href={candidate.dbpediaURL}> Link </a> </td>
             <td> {candidate.score} </td>
