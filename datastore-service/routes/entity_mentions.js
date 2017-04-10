@@ -322,9 +322,7 @@ router.post('/:id/candidates', function(req, res, next){
                 "errorMsg": "EntityType ["+req.body.entityType+"] was not found!"
             });
         } else {
-            console.log('Score is: '+req.body.score);
             var v1score = parseFloat(req.body.score);
-            console.log('float value '+v1score);
             models.Candidate.create({
                 candidate_name: req.body.candidateName,
                 description: req.body.description,

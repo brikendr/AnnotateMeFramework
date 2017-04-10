@@ -10,7 +10,6 @@ exports.prepareTaskData = function(reqData, callBack){
     for(var i = 0; i < exludedEntities.length; i++) {
         NOT_IN[i] = exludedEntities[i];
     }
-    console.log("NOT IN", NOT_IN);
     //2. Query all entities from the table (exluding the ones that were annotated previously)
     getEntities(NOT_IN, function(entities){
 
@@ -21,7 +20,6 @@ exports.prepareTaskData = function(reqData, callBack){
         //3. Get the length of the entity list and generate a random number from zero to arraylist.length 
         var randomIDX = entities.length > 1 ? Math.floor(Math.random() * entities.length): 0;
         //var randomIDX = entities[randomIDX];
-        console.log('randomIDX = ',randomIDX);
 
         //4. The random number will be the index of the entity that will be taken for evaluation 
 

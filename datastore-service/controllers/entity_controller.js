@@ -67,6 +67,96 @@ exports.triggerEntityResolution = function(entityID) {
     });
 }
 
+exports.testCandidateGeneration = function(callBack){
+    models.EntityMention.findAll({
+        include: [models.Collocation]
+    }).then(function(entities){
+        var newEntities = [];
+        async.forEach(entities, function (entity, callback){ 
+            var sentance = "";
+            getNeighborEntities(entity, function(neighborEntities){
+                var isBefore = true;
+                async.forEach(neighborEntities, function (neighborEntity, callback){ 
+                    generateSentance(neighborEntity, entity,isBefore, function(generatedSentance, isBeforeCondition){
+                        sentance += ", " + generatedSentance;
+                        isBefore = isBeforeCondition;
+                        callback();
+                    });
+                }, function(err) {
+                    if(sentance.indexOf(entity.description) == -1){
+                        async.forEach(entity.Collocations, function (collocation, callback){ 
+                            sentance += ", " + collocation.collocation_json;
+                            callback();
+                        }, function(err) {
+                            sentance += ", " + entity.description;
+                        });
+                    }
+                    var e = {
+                        'id': entity.id,
+                        'description': entity.description,
+                        'start_index': entity.start_index,
+                        'end_index': entity.end_index,
+                        'newDescription': sentance
+                    };
+                    entity.newDescription = sentance;
+                    newEntities.push(e);
+                    callback();
+                });
+            });
+        }, function(err) {
+            callBack(newEntities);
+        });
+    })
+}
+
+var generateSentance = function(neighborEntity, entity,isBefore, callBack) {
+    var sentance = "";
+    if(neighborEntity.end_index < entity.start_index) {
+        sentance += ", " + neighborEntity.description;
+    }
+    else{
+        if(isBefore) {
+            isBefore = false;
+            async.forEach(entity.Collocations, function (collocation, callback){ 
+                sentance += ", " + collocation.collocation_json;
+                callback();
+            }, function(err) {
+                sentance += ", " + entity.description;
+            });
+        }
+        sentance += ", " + neighborEntity.description;
+    }
+    callBack(sentance, isBefore);
+}
+
+var getNeighborEntities = function(entity, callBack) {
+    //ABS(91 - (`end_index` + `start_index`))
+    var entityPos = entity.end_index + entity.start_index;
+    models.EntityMention.findAll({
+        where: {
+            id: {
+                $ne: entity.id
+            },
+            DocumentId: entity.DocumentId
+        },
+        order: [
+            [sequelize.fn('ABS', sequelize.condition(sequelize.col('start_index'), '+', sequelize.col('end_index'))), 'ASC']
+        ]
+    }).then(function(result){
+        var ordered = [];
+        for (var i = 0; i < result.length; i++) {
+            var distance = Math.abs(entityPos - (result[i].start_index + result[i].end_index));
+            result[i].distance = distance;
+        }
+
+        result.sort(function(a, b){
+            return a.distance - b.distance;
+        });
+
+        callBack(result.length > 4 ? result.slice(0, 4):result);
+    });
+}
+
 var resolveEntity = function(entityID, candidateID) {
     models.EntityMention.update({
         is_resolved: true

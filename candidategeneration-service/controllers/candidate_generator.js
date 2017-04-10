@@ -48,14 +48,13 @@ var queryDBPediaSpotlight = function(entity, confidence, support, callBack){
     var options = {
         url: 'http://www.dbpedia-spotlight.com/en/candidates',
         form: {
-            text: entity.description,
+            text: entity.newDescription,
             confidence: confidence,
             support: support,
             policy: 'whitelist'            
         },
         method: 'POST'
-    };
-
+    }; 
     
     rest.postRequestJSON(options, function(statusCode, surfaceForms){
         
@@ -65,14 +64,26 @@ var queryDBPediaSpotlight = function(entity, confidence, support, callBack){
         } else {
             if(surfaceForms.length != null){
                 for(var i = 0; i < surfaceForms.length; i++) {
-                    for(var k = surfaceForms[i].resource.length - 1; k >= surfaceForms[i].resource.length - (Math.round(surfaceForms[i].resource.length * (surfaceForms.length/10))); k--){
-                        var candidate = surfaceForms[i].resource[k];
+                    if((surfaceForms[i].name.trim()).indexOf(entity.description.trim()) != -1 || (entity.description.trim()).indexOf(surfaceForms[i].name.trim()) != -1) {
+                        var conditionBorder = surfaceForms[i].resource.length > 8 ? (surfaceForms[i].resource.length - 8):0;
+                        if(surfaceForms[i].resource.length == null) {
+                            var candidate = surfaceForms[i].resource;
+                            candidate.finalScore = parseFloat(Number(candidate.finalScore).toFixed(8));
+                            candidate.rank = 1;//First rank is 1 not 0
+                            candidate.totalRank =  1;
+                            candidate.EntityMentionID = entity.id;
+                            candidateList.push(candidate);
+                        } else {
+                            for(var k = surfaceForms[i].resource.length - 1; k >= conditionBorder; k--){
+                                var candidate = surfaceForms[i].resource[k];
+                                candidate.finalScore = parseFloat(Number(candidate.finalScore).toFixed(8));
+                                candidate.rank = surfaceForms[i].resource.length - k;//First rank is 1 not 0
+                                candidate.totalRank =  surfaceForms[i].resource.length - conditionBorder;
+                                candidate.EntityMentionID = entity.id;
+                                candidateList.push(candidate);
+                            }
+                        }
                         
-                        candidate.finalScore = parseFloat(Number(candidate.finalScore).toFixed(8));
-                        candidate.rank = surfaceForms[i].resource.length - k;//First rank is 1 not 0
-                        candidate.totalRank =  Math.round(surfaceForms[i].resource.length * (surfaceForms.length/10));
-                        candidate.EntityMentionID = entity.id;
-                        candidateList.push(candidate);
                     }
                 }
             } else {
@@ -116,14 +127,14 @@ var queryDBPediaLookup = function(candidate, callBack) {
     };
     
     options.url += "?"+data;
-
     var newCandidate = candidate;
+    
     rest.getRequestJSON(options, function(statusCode, candidateData){
         if(candidateData == null) {
             callBack();
         } else {
             newCandidate.description = candidateData.description != null ? utf8.encode(candidateData.description):"";
-            newCandidate.dbpediaURI = candidateData.uri;
+            newCandidate.dbpediaURI = "http://dbpedia.org/resource/"+candidate.uri;
             newCandidate.categories = candidateData.categories;
             callBack(newCandidate);
         }   
