@@ -18,6 +18,9 @@ module.exports = function(sequelize, DataTypes) {
 
                 //Relation with EntityType
                 EntityMention.belongsTo(models.EntityType);
+                
+                //Relation with Category
+                EntityMention.belongsTo(models.Category);
 
                 //Relation with Sentance 
                 EntityMention.belongsTo(models.Sentance);

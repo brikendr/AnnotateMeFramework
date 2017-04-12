@@ -28,10 +28,15 @@ var AnnotateMeMainContainer = require('../containers/AnnotateMe/AnnotateMeMainCo
 var FinalExperimentContainer = require('../containers/AnnotateMe/FinalExperimentContainer');
 /*--------------------------- END OF ANNOTATEME ROUTES ------------------------------*/
 
+/*------------------------------------ GAME ROUTES--------------------------------------------*/
+var GameIntroScreen = require('../containers/Game/GameIntroContainer');
+var OnBoardingContainer = require('../containers/Game/Onboarding/OnboardingContainer');
+/*---------------------------------END GAME ROUTES--------------------------------------------*/
+
 var routes = (
   <Router history={hashHistory}>
     <Route path='/' component={Main}>
-      <IndexRoute component={Home} />
+      <IndexRoute component={GameIntroScreen} />
       <Route path='/adminPanel' component={LoginContainer} />
       <Route path='/adminDashboard' component={Dashboard} />
       <Route path='/documents' component={DocumentListContainer} />
@@ -49,6 +54,8 @@ var routes = (
       <Route path='/annotationTask/:participantNR/view' component={AnnotateMeMainContainer} />
       <Route path='/annotationTask/finalizeExperiment' component={FinalExperimentContainer} />
       
+      <Route path='/aboardIntro' component={OnBoardingContainer} />
+      OnBoardingContainer
     </Route>
   </Router>
 );

@@ -9,7 +9,7 @@ require('../styles/components.css');
 var Main = React.createClass({
   render: function () {
     return (
-      <div className='main-container' style={styles.imageBackground}>
+      <div className='main-container'>
         {<ReactCssTransitionGroup
           transitionName="appear"
           transitionEnterTimeout={500}
