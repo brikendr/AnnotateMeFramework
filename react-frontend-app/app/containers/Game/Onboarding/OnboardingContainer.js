@@ -35,7 +35,6 @@ var OnBoardingContainer = React.createClass({
         })
     },
     handleSpaceClick(e) {
-        console.log('Screen NR and hasFinished Round ', this.state.screenNr, this.state.hasFinishedRound);
         if(e.keyCode == 32 && (this.state.hasFinishedRound || this.state.screenNr == 1 || this.state.screenNr == 3)) {
             switch (this.state.screenNr) {
                 case 1:
@@ -77,10 +76,10 @@ var OnBoardingContainer = React.createClass({
         window.location.href = "/";
     },
     componentWillMount: function(){
-        document.addEventListener("keydown", this.handleSpaceClick, false);
+        document.addEventListener("keydown", this.handleSpaceClick);
     },
     removeKeyDownListener() {
-        document.removeEventListener("keydown", this.handleSpaceClick, false);
+        document.removeEventListener("keydown", this.handleSpaceClick);
     },
     render() {
         return (

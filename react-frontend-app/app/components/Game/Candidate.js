@@ -10,8 +10,8 @@ var Candidate = React.createClass({
         }
     },
     componentDidMount() {
-        document.addEventListener("keydown", this.props.onCandidateSelection, false);
-        document.addEventListener("keydown", this.localCandidateSelectionHandler, false);
+        document.addEventListener("keydown", this.props.onCandidateSelection);
+        document.addEventListener("keydown", this.localCandidateSelectionHandler);
     },
     localCandidateSelectionHandler(e){
         if(e.keyCode == (48 + this.props.number)) {
@@ -21,7 +21,7 @@ var Candidate = React.createClass({
                     currentStatus: "green-jungle",
                     annimation: "animated bounce"
                 });
-                 document.removeEventListener("keydown", this, false);
+                this.removeKeyDownListener();
             } else {
                 //wrong answer
                 this.setState({
@@ -36,6 +36,9 @@ var Candidate = React.createClass({
                 annimation: ""
             });
         }
+    },
+    removeKeyDownListener() {
+        document.removeEventListener("keydown", this.localCandidateSelectionHandler);
     },
     render() {
         return (

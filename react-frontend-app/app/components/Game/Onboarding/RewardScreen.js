@@ -1,14 +1,16 @@
 var React = require('react');
 var PropTypes = React.PropTypes;
 var SpaceActionBtn = require('../SpaceActionBtn');
+var GameHelper = require('../../../utils/GameHelper');
 
 var RewardScreen = React.createClass({
     getInitialState: function() {
         return {
-            emailAnimation: "animated fadeInUp",
+            usernameAnimation: "animated fadeInUp",
             passwordAnimation: "animated fadeInUp",
-            email: "",
-            password: ""
+            username: "",
+            password: "",
+            infoMessage: ""
         }
     },
     componentDidMount() {
@@ -16,9 +18,9 @@ var RewardScreen = React.createClass({
     },
     handleLocalSpacePress(e) {
         if(e.ctrlKey && e.keyCode == 32){
-            if(this.state.email.trim() == ""){
+            if(this.state.username.trim() == ""){
                 this.setState({
-                    emailAnimation: "animated shake"
+                    usernameAnimation: "animated shake"
                 });
             }
             else if(this.state.password.trim() == ""){
@@ -27,17 +29,25 @@ var RewardScreen = React.createClass({
                 });
             } else {
                 //TODO: Register user then redirect, plus stats
-                console.log('CHANGING SCREEN TO 6');
-                this.props.redirectHome();
+                GameHelper.registerPlayer({
+                    'username': this.state.username,
+                    'password': this.state.password
+                }).then(function(response){
+                    if(response.status == 200) {
+                        this.props.redirectHome();
+                    } else if(response.status == 403) {
+                        this.setState({infoMessage: <span className="font-red-thunderbird font-sm sbold">{response.errorMsg}!</span>});
+                    }
+                }.bind(this));
             }
         }
     },
     generateStats(stoptime){
         this.props.changeScreenNr(3);
     },
-    handleEmailChange(event){
+    handleUsernameChange(event){
         this.setState({
-            email: event.target.value
+            username: event.target.value
         });
     },
     handlePassChange(event){
@@ -62,12 +72,13 @@ var RewardScreen = React.createClass({
                 <div className="row justify-content-center">
                     <div className="col-4 text-center">
                         <h3> Password: <strong>fightclub</strong></h3>
+                        <h2 className="animated fadeInUp">{this.state.infoMessage}</h2>
                     </div>
                 </div>
                 <div className={"row justify-content-center margin-top-10"}>
                     <div className="col-4">
-                        <div className={"form-group form-md-line-input has-success " + this.state.emailAnimation}>
-                            <input className="form-control input-lg" autoFocus placeholder="Your E-mail" type="email" value={this.state.email} onChange={this.handleEmailChange}/>
+                        <div className={"form-group form-md-line-input has-success " + this.state.usernameAnimation}>
+                            <input className="form-control input-lg" autoFocus placeholder="Your username" type="username" value={this.state.username} onChange={this.handleUsernameChange}/>
                         </div>
                     </div>
                 </div>

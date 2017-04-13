@@ -55,7 +55,7 @@ var routes = (
       <Route path='/annotationTask/finalizeExperiment' component={FinalExperimentContainer} />
       
       <Route path='/aboardIntro' component={OnBoardingContainer} />
-      OnBoardingContainer
+      
     </Route>
   </Router>
 );

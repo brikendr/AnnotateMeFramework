@@ -86,7 +86,6 @@ var EntityRevealScreen = React.createClass({
         var nextCharToReveal = this.state.nextCharToReveal;
         var elements = this.state.characterElements;
 
-        console.log(currentWordIndex,accumulatedRevCount,wordsPerCharacter)
         if(currentWordIndex == (accumulatedRevCount + wordsPerCharacter)) {
             //reveal character in order 
             elements[nextCharToReveal] = <button key={nextCharToReveal} type="button" className="btn uppercase btn-circle green btn-outline animated flipInX ">{this.state.entityToReveal.charAt(nextCharToReveal)}</button>;
@@ -112,18 +111,22 @@ var EntityRevealScreen = React.createClass({
         }
     },
     handleCandidateSelection(e) {
-        console.log('canidadte selection');
         if(e.keyCode == (48 + this.state.correctAnswer)) {
             this.setState({
                 didFinishRound: true
             });
             this.props.changeScreenNr(5);
+            this.unbindListeners();
         } else {
             this.setState({
                 didFinishRound: false
             });
             this.props.changeScreenNr(5, false);
         }
+    },
+    unbindListeners() {
+        document.removeEventListener("keydown", this.handleCandidateSelection);
+        //document.removeEventListener("keydown", this.hanldeFastType.bind(this));
     },
     handleInputChange(event) {
         if(this.state.started == false) {
