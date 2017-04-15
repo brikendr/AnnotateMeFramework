@@ -42,7 +42,7 @@ var Candidate = React.createClass({
     },
     render() {
         return (
-        <div className={"col-md-4 "+ this.state.annimation}>
+        <div className={"col-md-6 "+ this.state.annimation}>
             <div className="form-group form-md-line-input">
                 <div className="col-md-10">
                     <div className="input-group input-group-sm">

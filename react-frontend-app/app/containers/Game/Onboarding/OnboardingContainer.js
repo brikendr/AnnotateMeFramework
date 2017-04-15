@@ -25,51 +25,52 @@ var OnBoardingContainer = React.createClass({
                 "teen",
                 "idol"
             ],
-            hasFinishedRound: false
+            hasFinishedRound: false,
+            screenOneState: 1,
+            screenTwoState: 1
         }
     },
-    handleChangeScreen(newScreenNr, hasFinished) {
+    handleChangeScreen(newScreenNr, nextScreen,hasFinished) {
         this.setState({
             screenNr: newScreenNr,
+            nextScreen: nextScreen,
             hasFinishedRound: hasFinished == null ? true:hasFinished
         })
     },
     handleSpaceClick(e) {
-        if(e.keyCode == 32 && (this.state.hasFinishedRound || this.state.screenNr == 1 || this.state.screenNr == 3)) {
-            switch (this.state.screenNr) {
-                case 1:
-                    this.setState({
-                        screenNr: 2,
-                        hasFinishedRound: false,
-                        currentScreen: <WaveScreen words={this.state.wave1Words} onFinishWave={this.handleSpaceClick} changeScreenNr={this.handleChangeScreen} />
-                    });
-                    break;
-                case 2: 
-                    this.setState({
-                        screenNr: 3,
-                        hasFinishedRound: false,
-                        currentScreen: <PuzzleIntro onSpaceActionBtn={this.handleSpaceClick} />
-                    });
-                    break;
-                case 3: {
-                    this.setState({
-                        screenNr: 4,
-                        hasFinishedRound: false,
-                        currentScreen: <EntityRevealScreen words={this.state.wave2Words} onFinishWave={this.handleSpaceClick} changeScreenNr={this.handleChangeScreen} />
-                    });
-                    break;
-                }
-                case 5: {
-                    this.setState({
+        var scNr = this.state.screenNr;
+        if(e.keyCode == 32 && (this.state.hasFinishedRound || scNr == 1)) {
+            if(scNr == 1 && [1, 2, 3].indexOf(this.state.screenOneState) != -1) {
+                var screenOneNext = this.state.hasFinishedRound ? this.state.screenOneState + 1:this.state.screenOneState;
+                var finishedRoundOne = this.state.screenOneState == 2 ? false:true;
+                this.setState({
+                    screenNr: 1,
+                    screenOneState: screenOneNext,
+                    hasFinishedRound: finishedRoundOne,
+                    currentScreen: <WaveScreen words={this.state.wave1Words} onFinishWave={this.handleSpaceClick} changeScreenNr={this.handleChangeScreen} />
+                });
+            }
+            else if(this.state.screenOneState == 4 && this.state.screenTwoState == 1) {
+                var scrTwoState = this.state.screenTwoState + 1;
+                this.setState({
+                    screenNr: 3,
+                    screenTwoState: scrTwoState,
+                    hasFinishedRound: true,
+                    currentScreen: <PuzzleIntro onSpaceActionBtn={this.handleSpaceClick} />
+                });
+            } else if (scNr == 3) {
+                this.setState({
+                    screenNr: 3,
+                    hasFinishedRound: false,
+                    currentScreen: <EntityRevealScreen words={this.state.wave2Words} onFinishWave={this.handleSpaceClick} changeScreenNr={this.handleChangeScreen} />
+                });
+            } else if(scNr == 4) {
+                this.setState({
                         hasFinishedRound: false,
                         currentScreen: <RewardScreen onFinishWave={this.handleSpaceClick} redirectHome={this.handleRedirectHome} />
                     });
-                    break;
-                }
-                default: 
-                    break;
             }
-        } 
+        }
     },
     handleRedirectHome() {
         this.removeKeyDownListener();

@@ -28,7 +28,6 @@ var RewardScreen = React.createClass({
                     passwordAnimation: "animated shake"
                 });
             } else {
-                //TODO: Register user then redirect, plus stats
                 GameHelper.registerPlayer({
                     'username': this.state.username,
                     'password': this.state.password
@@ -43,7 +42,7 @@ var RewardScreen = React.createClass({
         }
     },
     generateStats(stoptime){
-        this.props.changeScreenNr(3);
+        this.props.changeScreenNr(5);
     },
     handleUsernameChange(event){
         this.setState({

@@ -1,38 +1,40 @@
-var React = require('react');
-var ReactRouter = require('react-router');
-var Router = ReactRouter.Router;
-var Route = ReactRouter.Route;
-var hashHistory = ReactRouter.hashHistory;
-var IndexRoute = ReactRouter.IndexRoute;
-var Main = require('../components/Main');
-var Home = require("../components/Home");
+var React = require('react'),
+  ReactRouter = require('react-router'),
+  Router = ReactRouter.Router,
+  Route = ReactRouter.Route,
+  hashHistory = ReactRouter.hashHistory,
+  IndexRoute = ReactRouter.IndexRoute,
+  Main = require('../components/Main'),
+  Home = require("../components/Home");
 
 /*--------------------- START DEFINING ADMIN ROUTES --------------------------------*/
-var LoginContainer = require('../containers/Admin/LoginContainer');
-var Dashboard = require('../components/Admin/Dashboard');
-var DocumentListContainer = require('../containers/Admin/DocumentListContainer');
-var DocumentExploreContainer = require('../containers/Admin/DocumentExploreContainer');
-var SentanceListContainer = require('../containers/Admin/SentanceListContainer');
-var KeywordListContainer = require('../containers/Admin/KeywordListContainer');
-var EntityListContainer = require('../containers/Admin/EntityListContainer');
-var CollocationListContainer = require('../containers/Admin/CollocationListContainer');
-var CandidateListContainer = require('../containers/Admin/CandidateListContainer');
-var AnnotationsListContainer = require('../containers/Admin/AnnotationListContainer');
-var ParticipantListContainer = require('../containers/Admin/ParticipantListContainer');
-var NewDocumentContainer = require('../containers/Admin/NewDocumentContainer');
+var LoginContainer = require('../containers/Admin/LoginContainer'),
+  Dashboard = require('../components/Admin/Dashboard'),
+  DocumentListContainer = require('../containers/Admin/DocumentListContainer'),
+  DocumentExploreContainer = require('../containers/Admin/DocumentExploreContainer'),
+  SentanceListContainer = require('../containers/Admin/SentanceListContainer'),
+  KeywordListContainer = require('../containers/Admin/KeywordListContainer'),
+  EntityListContainer = require('../containers/Admin/EntityListContainer'),
+  CollocationListContainer = require('../containers/Admin/CollocationListContainer'),
+  CandidateListContainer = require('../containers/Admin/CandidateListContainer'),
+  AnnotationsListContainer = require('../containers/Admin/AnnotationListContainer'),
+  ParticipantListContainer = require('../containers/Admin/ParticipantListContainer'),
+  NewDocumentContainer = require('../containers/Admin/NewDocumentContainer');
 /*------------------------ END OF ADMIN ROUTES --------------------------------------*/
 
 /*-------------------------- START ANNOTATEME ROUTES ---------------------------------*/
-var RegisterParticipantContainer = require('../containers/AnnotateMe/RegisterParticipantContainer');
-var AnnotateMeMainContainer = require('../containers/AnnotateMe/AnnotateMeMainContainer');
-var FinalExperimentContainer = require('../containers/AnnotateMe/FinalExperimentContainer');
+var RegisterParticipantContainer = require('../containers/AnnotateMe/RegisterParticipantContainer'),
+  AnnotateMeMainContainer = require('../containers/AnnotateMe/AnnotateMeMainContainer'),
+  FinalExperimentContainer = require('../containers/AnnotateMe/FinalExperimentContainer');
 /*--------------------------- END OF ANNOTATEME ROUTES ------------------------------*/
 
 /*------------------------------------ GAME ROUTES--------------------------------------------*/
-var GameIntroScreen = require('../containers/Game/GameIntroContainer');
-var OnBoardingContainer = require('../containers/Game/Onboarding/OnboardingContainer');
+var GameIntroScreen = require('../containers/Game/GameIntroContainer'),
+  OnBoardingContainer = require('../containers/Game/Onboarding/OnboardingContainer'),
+  GameMainScreen = require('../containers/Game/GameHomeContainer'),
+  GameplayContainer  = require('../containers/Game/GameplayContainer');
 /*---------------------------------END GAME ROUTES--------------------------------------------*/
-
+//TODO CHANGE INDEX ROUTE TO GAME INTRO
 var routes = (
   <Router history={hashHistory}>
     <Route path='/' component={Main}>
@@ -55,7 +57,8 @@ var routes = (
       <Route path='/annotationTask/finalizeExperiment' component={FinalExperimentContainer} />
       
       <Route path='/aboardIntro' component={OnBoardingContainer} />
-      
+      <Route path='/fasttype/home' component={GameMainScreen} />
+      <Route path='/play' component={GameplayContainer} />
     </Route>
   </Router>
 );

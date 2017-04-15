@@ -22,10 +22,18 @@ var GameHelper = {
             return response.data;
         })
         .catch(function (err) {
-            console.warn('Error in GameHelper:authenticateUser: ', err);
+            console.warn('Error in GameHelper:registerPlayer: ', err);
+        });
+    },
+    getCategories: function() {
+        return axios.get(MainUrl + 'categories')
+        .then(function (response) {
+            return response.data;
+        })
+        .catch(function (err) {
+            console.warn('Error in GameHelper:getCategories: ', err);
         });
     }
-
 }
 
 module.exports = GameHelper;

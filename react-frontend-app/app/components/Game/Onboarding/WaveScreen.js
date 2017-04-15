@@ -1,6 +1,7 @@
 var React = require('react');
-var PropTypes = React.PropTypes;
-var SpaceActionBtn = require('../SpaceActionBtn');
+    PropTypes = React.PropTypes;
+    SpaceActionBtn = require('../SpaceActionBtn'),
+    calculateWPM = require('../../../utils/globalFunctions').caluclateWPM;
 
 var WaveScreen = React.createClass({
     getInitialState: function() {
@@ -32,7 +33,8 @@ var WaveScreen = React.createClass({
                         nextWord: "",
                         inputText: "",
                         hideInputField: "hidden",
-                        hideActionBtn: ""
+                        hideActionBtn: "",
+                        currentWordIndex: nextIndex
                     });
                     this.generateStats(new Date().getTime());
                 } else {
@@ -70,15 +72,11 @@ var WaveScreen = React.createClass({
         });
     },
     generateStats(stoptime){
-        var diffSeconds = (stoptime - this.state.startTimespan) / 1000;
-        var totalWords = this.state.words.length;
-
-        //Calculate WPS (Words per minute)
-        var wps = totalWords * 60 / diffSeconds;
+        var wpm = calculateWPM(this.state.currentWordIndex + 1, stoptime, this.state.startTimespan)
         this.setState({
-            stats: <span>Your Speed: <strong>{Math.round(wps)}</strong> WPS (words per second)</span>
+            stats: <span>Your Speed: <strong>{Math.round(wpm)}</strong> WPM (words per minute)</span>
         });
-        this.props.changeScreenNr(2);
+        this.props.changeScreenNr(1);
     },
     render() {
         return ( 

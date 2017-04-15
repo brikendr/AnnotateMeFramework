@@ -1,7 +1,9 @@
-var React = require('react');
-require('../../styles/animate.css');
-var GameHelper = require('../../utils/GameHelper');
-var GameLoadingGif =  require('../../assets/img/gameloading.gif')
+var React = require('react'),
+    PropTypes = React.PropTypes,
+    GameHelper = require('../../utils/GameHelper'),
+    GameLoadingGif =  require('../../components/Game/GameLoadingGif'),
+    ReactRedux = require("react-redux"),
+    actions = require('../../redux/actions/authActions');
 
 var GameIntroContainer = React.createClass({
     contextTypes: {
@@ -22,9 +24,22 @@ var GameIntroContainer = React.createClass({
             infoMessage: <span className="font-blue-soft font-sm sbold">Type Secret Combo!</span>
         }
     },
+    propTypes:{
+        authenticatedUser: PropTypes.object.isRequired,
+        userAuthenticated: PropTypes.func.isRequired
+    },
+    componentWillMount:function(){
+        document.addEventListener("keydown", this.handleKeyPress);
+    },
+    componentDidMount() {
+        if(this.props.authenticatedUser.authenticated) {
+            //SEND TO Home page
+            this.redirectGame('fasttype/home');
+        }
+    },
     handleKeyPress(e) {
         if(e.ctrlKey && e.keyCode == 32) {
-            this.redirectGame('/aboardIntro');
+            this.redirectGame('aboardIntro');
         } 
         else if(e.keyCode == 32) {
             var nextIndex = this.state.currentWordIndex + 1;
@@ -34,11 +49,12 @@ var GameIntroContainer = React.createClass({
                     inputText: "",
                     isAuthenticating: true
                 });
+
                 GameHelper.authenticateUser(this.state.username, this.state.password)
                 .then(function(response){
-                    console.log(response);
                     if (response.status == 200 && this.state.gameSecret.toUpperCase() == "FIGHTCLUB") {
-                        alert('Authentication passed!');
+                        this.props.userAuthenticated(response.resource);
+                        this.redirectGame('fasttype/home');
                     } else {
                         this.setState(this.getInitialState());
                         this.setState({
@@ -74,9 +90,6 @@ var GameIntroContainer = React.createClass({
             inputText: event.target.value
         });
     },
-    componentWillMount:function(){
-        document.addEventListener("keydown", this.handleKeyPress);
-    },
     render() {
         return (
             <div className="container">
@@ -89,11 +102,7 @@ var GameIntroContainer = React.createClass({
                 
 
                 {this.state.isAuthenticating ?
-                <div className="row justify-content-center margin-top-0 animated zoomIn" >
-                    <div className="col-4 text-center">
-                        <img className="display-img-center" src={GameLoadingGif} width="100%"/>
-                    </div>
-                </div>
+                <GameLoadingGif />
                 :
                 <div>
                     <div className="row justify-content-center margin-top-10">
@@ -125,13 +134,26 @@ var GameIntroContainer = React.createClass({
     }
 });
 var styles = {
-  centerIt: {
-    marginTop: '15%'
-  },
-  disclaimerFooter: {
-    display: 'block',
-    margin: '0 auto'
-}
+    centerIt: {
+        marginTop: '15%'
+    },
+    disclaimerFooter: {
+        display: 'block',
+        margin: '0 auto'
+    }
 }
 
-module.exports = GameIntroContainer;
+// connect to Redux store
+var mapStateToProps = function(state){
+    // This component will have access to `appstate.heroes` through `this.props.heroes`
+    return {authenticatedUser: state.user};
+};
+
+var mapDispatchToProps = function(dispatch){
+    return {
+        userAuthenticated: function(jsonData){ dispatch(actions.userAuthenticated(jsonData)); }
+    }
+};
+
+module.exports = ReactRedux.connect(mapStateToProps,mapDispatchToProps)(GameIntroContainer);
+//module.exports = GameIntroContainer;

@@ -1,8 +1,16 @@
-var React = require('react');
-var ReactDOM = require('react-dom');
-var routes = require('./config/routes');
+var React = require('react'),
+    ReactDOM = require('react-dom'),
+    routes = require('./config/routes'),
+    Router = require('react-router').Router,
+    browserHistory = require('react-router').browserHistory,
+    Provider = require('react-redux').Provider,
+    store = require('./redux/store');
+
+
 
 ReactDOM.render(
-    routes,
+    <Provider store={store}>
+        <Router routes={routes} history={ browserHistory } />
+    </Provider>,
     document.getElementById('app')
 );

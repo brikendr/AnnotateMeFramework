@@ -1,12 +1,13 @@
-var React = require('react'),
-    PropTypes = React.PropTypes,
-    SpaceActionBtn = require('../SpaceActionBtn'),
-    Candidate = require('../Candidate'),
+require('../../../styles/speedometer.css');
+require('../../../assets/js/speedometer.js');
+var React = require('react');
+var PropTypes = React.PropTypes,
+    assets = require('../../../utils/constatns').assets,
     calculateWPM = require('../../../utils/globalFunctions').caluclateWPM,
-    GameClue = require('../GameClues');
-require('../../../styles/stickynotes.css');
+    GamePoint = require('./GamePoint'),
+    assetsDir = require('../../../utils/constatns').assets;
 
-var EntityRevealScreen = React.createClass({
+var StateTyping = React.createClass({
     getInitialState: function() {
         return {
             started: false,
@@ -15,19 +16,18 @@ var EntityRevealScreen = React.createClass({
             currentWord:    <button className="btn sbold btn-circle btn-lg animated zoomIn">{this.props.words[0]}</button>,
             previousWord:   "",
             nextWord:       <button className="btn sbold btn-circle btn-xs grey-salsa animated zoomIn">{this.props.words[1]}</button>,
-            words: this.props.words,
-            entityToReveal: "JOHNNY",
             accumulatedRevealCount: 0,
             nextCharToReveal: 0,
             characterElements: [],
             inputText: "",
+            speedometerDegree:  Math.round(0*180/120)-45,
+            wpm: 0,
             isEntityRevealed: false,
-            didFinishRound: false,
-            correctAnswer: 1
+            showGamePoint: null,
         }
     },
     componentDidMount() {
-        var entityCharacters = this.state.entityToReveal.split('');
+        var entityCharacters = this.props.entityToReveal.split('');
         var charElements = [];
         for(var i = 0; i<entityCharacters.length; i++){
             charElements[i] = <button key={i} type="button" className="btn uppercase btn-circle blue btn-outline animated flipInX "></button>;
@@ -39,20 +39,19 @@ var EntityRevealScreen = React.createClass({
     hanldeFastType(e) {
         if(e.keyCode == 32) {
             var currentText = this.state.inputText.trim();
-            var displayWord = this.state.words[this.state.currentWordIndex];
+            var displayWord = this.props.words[this.state.currentWordIndex];
             if(currentText === displayWord) {
                 //Display Next Word
                 nextIndex = this.state.currentWordIndex + 1;
-                if(nextIndex >= this.state.words.length) {
+                if(nextIndex >= this.props.words.length) {
                     this.setState({
-                        currentWord: <img src="app/assets/img/thumbsup.png" width="20%" />,
+                        currentWord: <img src={assets + "img/thumbsup.png"} width="20%" />,
                         previousWord: "",
                         nextWord: "",
                         inputText: "",
                         hideInputField: "hidden",
                         hideActionBtn: ""
                     });
-                    this.generateStats(new Date().getTime());
                 } else {
                     this.setState({
                         currentWord:    <button className="btn sbold btn-circle btn-lg animated slideInRight">{this.props.words[nextIndex]}</button>,
@@ -63,24 +62,35 @@ var EntityRevealScreen = React.createClass({
                     });
                 }
                 this.handleCharacterReveal();
+                this.playAudio("check-right");
             } else {
                 //make a red background 
                 this.setState({
-                    currentWord: <button className="btn sbold btn-circle btn-lg red-mint animated shake">{this.state.words[this.state.currentWordIndex]}</button>,
+                    currentWord: <button className="btn sbold btn-circle btn-lg red-mint animated shake">{this.props.words[this.state.currentWordIndex]}</button>,
                     inputText: currentText
                 });
+                this.playAudio("check-wrong");
             }
+            
         } else {
             this.setState({
-                currentWord: <button className="btn sbold btn-circle btn-lg">{this.state.words[this.state.currentWordIndex]}</button>
+                currentWord: <button className="btn sbold btn-circle btn-lg">{this.props.words[this.state.currentWordIndex]}</button>
             });
         }
-
+    },
+    calculateCurrentSpeed(currentTime){
+        var wordsPerMin = calculateWPM(this.state.currentWordIndex, currentTime, this.state.startTimespan);
         
+        updatedSpeed = Math.round(wordsPerMin*180/120)-45;
+        
+        this.setState({
+            wpm:  wordsPerMin,
+            speedometerDegree: updatedSpeed
+        });
     },
     handleCharacterReveal(){
         var currentWordIndex = this.state.currentWordIndex + 1;
-        var totalWords = this.state.words.length;
+        var totalWords = this.props.words.length;
         var totalChars = this.state.characterElements.length; 
         var wordsPerCharacter = Math.round(totalWords / totalChars);
         var accumulatedRevCount = this.state.accumulatedRevealCount;
@@ -89,7 +99,7 @@ var EntityRevealScreen = React.createClass({
 
         if(currentWordIndex == (accumulatedRevCount + wordsPerCharacter)) {
             //reveal character in order 
-            elements[nextCharToReveal] = <button key={nextCharToReveal} type="button" className="btn uppercase btn-circle green btn-outline animated flipInX ">{this.state.entityToReveal.charAt(nextCharToReveal)}</button>;
+            elements[nextCharToReveal] = <button key={nextCharToReveal} type="button" className="btn uppercase btn-circle green btn-outline animated flipInX ">{this.props.entityToReveal.charAt(nextCharToReveal)}</button>;
             
             this.setState({
                 characterElements: elements,
@@ -100,74 +110,54 @@ var EntityRevealScreen = React.createClass({
         
         if(currentWordIndex >= totalWords && nextCharToReveal <= elements.length - 1) {
             for(var i= nextCharToReveal; i < elements.length; i++) {
-                elements[i] = <button key={i} type="button" className="btn uppercase btn-circle green btn-outline animated flipInX ">{this.state.entityToReveal.charAt(i)}</button>;
+                elements[i] = <button key={i} type="button" className="btn uppercase btn-circle green btn-outline animated flipInX ">{this.props.entityToReveal.charAt(i)}</button>;
             
                 this.setState({
                     characterElements: elements
                 });
             }
-            this.setState({
-                isEntityRevealed: true
-            });
-        }
-    },
-    handleCandidateSelection(e) {
-        if(e.keyCode == (48 + this.state.correctAnswer)) {
-            this.setState({
-                didFinishRound: true
-            });
-            this.props.changeScreenNr(4);
+            this.setState({isEntityRevealed: true, currentWordIndex: currentWordIndex, showGamePoint: <GamePoint point={10}/>});
+            this.calculateCurrentSpeed(new Date().getTime());
+            this.props.setTypingStats({wpm: this.state.wpm}, this.state.characterElements);
             this.unbindListeners();
-        } else {
-            this.setState({
-                didFinishRound: false
-            });
-            this.props.changeScreenNr(4, false);
         }
     },
     unbindListeners() {
-        document.removeEventListener("keydown", this.handleCandidateSelection);
-        //document.removeEventListener("keydown", this.hanldeFastType.bind(this));
+        setTimeout(function () {
+            this.props.onGameStateChange("BONUS_QUESTION");
+        }.bind(this), 3000);
     },
     handleInputChange(event) {
-        if(this.state.started == false) {
+        if(this.state.started == false && event.target.value.trim() != "") {
             this.setState({
                 started: true,
                 startTimespan: new Date().getTime()
             });
+            var refreshId = setInterval(function() {
+                this.calculateCurrentSpeed(new Date().getTime());
+                if (this.state.isEntityRevealed) {
+                    clearInterval(refreshId);
+                }
+            }.bind(this), 100);
         }
         this.setState({
             inputText: event.target.value
         });
         
     },
-    generateStats(stoptime){
-        var wpm = calculateWPM(this.state.currentWordIndex + 1, stoptime, this.state.startTimespan);
-        this.setState({
-            stats: <span>Your Speed: <strong>{Math.round(wpm)}</strong> WPM (words per minute)</span>
-        });
-        
+    playAudio(soundID) {
+        var audio = document.getElementById(soundID);		
+        audio.play();
     },
     render() {
+        var degrees = 'rotate('+this.state.speedometerDegree+'deg)';
+        var spedometerCss = {
+            transform: degrees 
+        }
         return ( 
             <div>
-                
-                <div className={"row justify-content-center " + (this.state.isEntityRevealed ? "":"hidden")}>
-                    <div className="col-10 text-center">
-                        <div className="clearfix">
-                            <ul>
-                                <GameClue clue="Pirates of Caribbean" />
-                                <GameClue clue="Tourist" />
-                                <GameClue clue="Jack Sparrow" />
-                                <GameClue clue="Leading Role" />
-                                <GameClue clue="Scissorhands" />
-                                <GameClue clue="unique style" />
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div className={"row justify-content-center " + (this.state.isEntityRevealed ? "":"addTopMargin")}  >
-                    <div className="col-8 text-center">
+                <div className={"row justify-content-center marginTop5"}  >
+                    <div className="col-5 text-center">
                         <div className="clearfix">
                             <p>
                                 {this.state.characterElements}
@@ -175,36 +165,13 @@ var EntityRevealScreen = React.createClass({
                         </div>
                     </div>
                 </div>
-                {this.state.isEntityRevealed ? 
-                <div className={"row justify-content-center "}  >
-                    <div className="col-8 text-center">
-                        <div className="row justify-content-center">
-                            <Candidate name="Johnny Depp" number={1} correctAnswer={this.state.correctAnswer} onCandidateSelection={this.handleCandidateSelection}/>
-                            <Candidate name="Johnny Cash" number={2} correctAnswer={this.state.correctAnswer} onCandidateSelection={this.handleCandidateSelection}/>
-                        </div>
-                        <div className="row justify-content-center">
-                            <Candidate name="Johnny Chase" number={3} correctAnswer={this.state.correctAnswer} onCandidateSelection={this.handleCandidateSelection}/>
-                            <Candidate name="Johnny Belushi" number={4} correctAnswer={this.state.correctAnswer} onCandidateSelection={this.handleCandidateSelection}/>
-                        </div>
-                        <div className="row justify-content-center">
-                            <h5>Press the number to select candidate!</h5>
-                        </div>
-                    </div>
-                </div>
-                :
-                ""
-                }
-                
                 <div className="row justify-content-center margin-top-10">
                     <div className="col-4 text-center">
+                        <audio src="https://s3.amazonaws.com/freecodecamp/simonSound2.mp3" id="check-right"></audio>
+                        <audio src={assetsDir+"/audio/Button-sound-wrong.mp3"} id="check-wrong"></audio>
                         {this.state.previousWord} &nbsp;
                         {this.state.currentWord} &nbsp;
                         {this.state.nextWord}
-                    </div>
-                </div>
-                <div className="row justify-content-center">
-                    <div className="col-4 text-center">
-                        {this.state.stats}
                     </div>
                 </div>
                 <div className={"row justify-content-center margin-top-10 " + (this.state.isEntityRevealed ? "hidden":"")}>
@@ -215,23 +182,34 @@ var EntityRevealScreen = React.createClass({
                         </div>
                     </div>
                 </div>
-                <div className={this.state.didFinishRound ? "":"hidden"}>
-                    <SpaceActionBtn />
+
+                <div className={"row justify-content-center margin-top-10 "}>
+                    <div className="col-3 text-center">
+                        <div className="speedbox">
+                        <div className="speedbox__score" id="speedbox-score" style={spedometerCss}></div>
+                        <div className="speedbox__groove"></div>
+                        <div className="speedbox__odo">
+                            <div className="speedbox__down"><i className="fa fa-flash"></i> {this.state.wpm}<span> WPM</span></div>
+                        </div>
+                        <div className="speedbox__base"></div>
+
+                        </div>
+                    </div>
                 </div>
+
+                {this.state.showGamePoint}
             </div>
         );
     }
 });
-EntityRevealScreen.propTypes = {
-  words: PropTypes.array.isRequired,
-  onFinishWave: PropTypes.func.isRequired,
-  changeScreenNr: PropTypes.func.isRequired
+StateTyping.propTypes = {
+    onGameStateChange: PropTypes.func.isRequired,
+    setTypingStats: PropTypes.func.isRequired,
+    words: PropTypes.array.isRequired,
+    entityToReveal: PropTypes.string.isRequired,
 };
 
 var styles = {
-    addTopMargin: {
-        marginTop: '20%'
-    },
     numberCircle: {
         borderRadius: '50%',
         width: '120px',
@@ -245,4 +223,4 @@ var styles = {
     }
 }
 
-module.exports = EntityRevealScreen;
+module.exports = StateTyping;

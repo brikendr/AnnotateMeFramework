@@ -1,12 +1,13 @@
 var React = require('react');
-var PropTypes = React.PropTypes;
+var PropTypes = React.PropTypes
+    assetsDir = require('../../utils/constatns').assets;
 
 function SpaceActionBtn(props) {
     return (
         <div>
             <div className="row justify-content-center animated fadeInDown margin-top-10">
                 <div className="col-4">
-                    <img src="app/assets/img/spacebar.png" width="100%"/>
+                    <img src={assetsDir + "img/spacebar.png"} width="100%"/>
                     
                 </div>
             </div>

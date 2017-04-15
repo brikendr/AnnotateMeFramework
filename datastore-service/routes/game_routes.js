@@ -61,4 +61,16 @@ router.post('/register', function(req, res, next) {
 
 });
 
+router.get('/categories', function(req, res, next){
+    models.Category.findAll({
+        where: {
+            isactive: 1
+        }
+    }).then(function(result){
+        res.json({
+            "status": 200,
+            "resource": result
+        });
+    });
+})
 module.exports = router;
