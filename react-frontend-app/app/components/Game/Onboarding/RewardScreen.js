@@ -88,7 +88,7 @@ var RewardScreen = React.createClass({
                         </div>
                     </div>
                 </div>
-                <SpaceActionBtn message="Fill in all fields, Press CTRL + SPACE to continue!" />
+                <SpaceActionBtn command="CTRL + SPACE" message="Fill in all fields, Use command to continue!" divSize={12}/>
             </div>
         );
     }

@@ -5,7 +5,8 @@ var PropTypes = React.PropTypes,
     GameCandidate = require('./GameCandidate'),
     GameClue = require('../GameClues'),
     BetModal = require('./BetModal'),
-    SpaceActionBtn = require('../SpaceActionBtn');
+    SpaceActionBtn = require('../SpaceActionBtn'),
+    GamePoint = require('./GamePoint');
 
 var RevealScreen = React.createClass({
     getInitialState: function() {
@@ -14,7 +15,11 @@ var RevealScreen = React.createClass({
             mappedClues: [],
             animation: "",
             selectedACandidate: false,
-            selectedCandidate: null
+            selectedCandidate: null,
+            bettingPoints: 10,
+            playerIsBetting: false,
+            hasPlayerBet: false,
+            showGamePoint: null
         }
     },
     componentDidMount() {
@@ -34,14 +39,19 @@ var RevealScreen = React.createClass({
         });
         document.body.addEventListener("keydown", this.handleCandidateSelection);
         this.loadDependencies();
+
+        //REMOVE 
+        //this.setState({selectedACandidate: true})
     },
     loadDependencies() {
         require('../../../styles/speedometer.css');
         require('../../../assets/js/speedometer.js');
+        require('../../../styles/stickynotes.css');
     },
     handleCandidateSelection(e){
+        var val = this.state.bettingPoints;
         if([49, 50, 51, 52].indexOf(e.keyCode) != -1) {
-            this.setState({selectedCandidate: e.keyCode - 49,animation: "bg-green-jungle bg-font-green-jungle animated bounce"});
+            this.setState({selectedCandidate: e.keyCode - 49,animation: "bg-green-jungle bg-font-green-jungle animated bounce", showGamePoint: <GamePoint point={10}/>});
             this.playAudio("check-right");
             setTimeout(function () {
                 this.setState({animation: "", selectedACandidate: true});
@@ -58,10 +68,32 @@ var RevealScreen = React.createClass({
         else if((e.ctrlKey && e.keyCode == 32) && !this.state.playerIsBetting) {
             this.unbindListeners();
         }
+        else if (e.keyCode == 37 && this.state.playerIsBetting) {
+            //left ARROW
+            if(val > 10){
+                this.setState({bettingPoints: (val - 10)});
+            }           
+        } 
+        else if (e.keyCode == 39) {
+            //right arrow
+            if(val < 100){
+                this.setState({bettingPoints: (val + 10)});
+            }
+        } 
+        else if((e.ctrlKey && e.keyCode == 32) && this.state.playerIsBetting) {
+            this.toggleModal();
+            this.registerBettingPoints();
+            this.setState({playerIsBetting: false, hasPlayerBet: true});
+        }
+        
     },
     unbindListeners() {
         document.body.removeEventListener("keydown", this.handleCandidateSelection);
         this.props.onGameStateChange("POINTS_CHALLENGE");
+    },
+    registerBettingPoints() {
+        //TODO: LOGIC, register betting points
+        console.log('REGISTERING BETTING POINTS');
     },
     toggleModal() {
         var modalWrapper = document.querySelector('.modal-wrapper');
@@ -78,20 +110,21 @@ var RevealScreen = React.createClass({
         }
         
         return ( 
-            <div>
+            <div className="col-md-12">
+                {!this.state.selectedACandidate ?
                 <div className={"row justify-content-center"}>
-                    <div className="col-6 text-center">
-                        <div className="clearfix">
+                    <div className="col-10 text-center">
+                        
                             <ul>
                                 {this.state.mappedClues}
                             </ul>
-                        </div>
                     </div>
-                </div>
+                </div> : ""}
+
                 <div className={"row justify-content-center "}  >
                     <div className="col-5 text-center">
                         <div className="clearfix">
-                            <audio src={assetsDir+"/audio/Winning-sound-effect.mp3"} id="check-right"></audio>
+                            <audio src={assetsDir+"/audio/levelup.wav"} id="check-right"></audio>
                             <p>
                                 {this.props.charElements}
                             </p>
@@ -100,7 +133,7 @@ var RevealScreen = React.createClass({
                 </div>
                 <div className={"row justify-content-center " + (this.state.selectedACandidate ? "animated flipInX":"hidden")}>
                     <div className="col-4 text-center">
-                        You ARE DOING GOOD! You selected {this.props.candidates[this.state.selectedCandidate]}
+                        AWESOME! You selected <strong>{this.props.candidates[this.state.selectedCandidate]}</strong>
                     </div>                    
                 </div>
                 <div className={"row justify-content-center "+ (this.state.selectedACandidate ? "hidden":"")}  >
@@ -114,24 +147,25 @@ var RevealScreen = React.createClass({
                     </div>
                 </div>
                 
-                {this.state.selectedACandidate ? <BetModal title="BET"/> : ""}
+                {this.state.selectedACandidate ? 
+                    <BetModal   handleCandidateSelection={this.handleCandidateSelection}
+                                points={this.state.bettingPoints}/> : ""}
                 
 
                 {this.state.selectedACandidate ? 
                 <div className="container col-md-10 marginTop5">
                     <div className="row justify-content-center">
                         <div className="col-md-8">
-                            <h4>Wanna BET? Press CTRL + B!</h4>
+                            <h4>{this.state.hasPlayerBet ? "YOU have bet " + (this.state.bettingPoints / 10)+ " points": "Wanna BET? Press CTRL + B!"}</h4>
                         </div>
-                        
-                        <div className="col-md-6">
-                            <SpaceActionBtn message="CTRL + SPACE to Continue"/>
-                        </div>
+                        <SpaceActionBtn command="CTRL + SPACE" message="Continue" />
                     </div>
                 </div>
                 :
                 ""
                 }
+
+                {this.state.showGamePoint}
             </div>
         );
     }

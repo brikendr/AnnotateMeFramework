@@ -19,7 +19,7 @@ function PuzzleIntro(props) {
                     <h5> More <span className="label label-success">bonus points</span> if you are fast and accurate! </h5>
                 </div>
             </div>
-            <SpaceActionBtn />
+            <SpaceActionBtn command="SPACE" message="Hit SPACE to Continue" divSize={12}/>
         </div>
     );
 }

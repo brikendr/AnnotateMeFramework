@@ -32,7 +32,7 @@ var GamePoint = React.createClass({
     render(){
         var element = this.state.shouldShow ?         
         <div className={'center ' + this.state.pointAnimation}>
-            <button className='shinyBtn shinyBtn-glow'>{this.props.point} points!</button>
+            <button className='shinyBtn shinyBtn-glow'>+ {this.props.point} points!</button>
             <audio src={assetsDir+"/audio/levelup.wav"} id="sound-3"></audio>
         </div>
         : "";

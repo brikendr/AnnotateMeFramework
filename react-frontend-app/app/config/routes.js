@@ -32,7 +32,10 @@ var RegisterParticipantContainer = require('../containers/AnnotateMe/RegisterPar
 var GameIntroScreen = require('../containers/Game/GameIntroContainer'),
   OnBoardingContainer = require('../containers/Game/Onboarding/OnboardingContainer'),
   GameMainScreen = require('../containers/Game/GameHomeContainer'),
-  GameplayContainer  = require('../containers/Game/GameplayContainer');
+  GameplayContainer  = require('../containers/Game/GameplayContainer'),
+  PlayerProfile = require('../containers/Game/Player/PlayerProfile'),
+  GameLeaderboard = require('../containers/Game/Player/Leaderboard'),
+  ChallengeGame = require('../containers/Game/ChallengeGame');
 /*---------------------------------END GAME ROUTES--------------------------------------------*/
 //TODO CHANGE INDEX ROUTE TO GAME INTRO
 var routes = (
@@ -59,6 +62,9 @@ var routes = (
       <Route path='/aboardIntro' component={OnBoardingContainer} />
       <Route path='/fasttype/home' component={GameMainScreen} />
       <Route path='/play' component={GameplayContainer} />
+      <Route path='/profile' component={PlayerProfile} />
+      <Route path='/leaderboard' component={GameLeaderboard} />
+      <Route path='/challenge/:opponentID' component={ChallengeGame} />
     </Route>
   </Router>
 );

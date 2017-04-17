@@ -18,7 +18,7 @@ function IntroScreen(props) {
                     <h5 className="animated fadeInRight">Let's see how fast you can type shall we?</h5>
                 </div>
             </div>
-            <SpaceActionBtn />
+            <SpaceActionBtn command="SPACE" message="Hit SPACE to Continue" divSize={12}/>
         </div>
     );
 }

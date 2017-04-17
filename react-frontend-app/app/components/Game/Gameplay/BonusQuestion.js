@@ -2,13 +2,15 @@ var React = require('react');
 var PropTypes = React.PropTypes,
     assetsDir = require('../../../utils/constatns').assets,
     calculateWPM = require('../../../utils/globalFunctions').caluclateWPM,
-    GameCandidate = require('./GameCandidate');
+    GameCandidate = require('./GameCandidate'),
+    GamePoint = require('./GamePoint');
 
 var BonusQuestion = React.createClass({
     getInitialState: function() {
         return {
             mappedCandidates: [],
-            animation: ""
+            animation: "",
+            showGamePoint: null,
         }
     },
     componentDidMount() {
@@ -16,9 +18,8 @@ var BonusQuestion = React.createClass({
         
         var i = 1;
 
-        const mappedCandidates = this.props.candidates.map(candidate => 
-            <GameCandidate key={i} name={candidate} number={i++}/>
-                            
+        const mappedCandidates = this.props.bonusQuestion.candidates.map(candidate => 
+            <GameCandidate key={i} name={candidate} number={i++}/>               
         );
         
         this.setState({
@@ -28,8 +29,8 @@ var BonusQuestion = React.createClass({
     },
     handleCandidateSelection(e){
         if([49, 50, 51, 52].indexOf(e.keyCode) != -1) {
-            if(e.keyCode == (48 + this.props.correctAnswer)) {
-                this.setState({animation: "bg-green-jungle bg-font-green-jungle animated bounce"});
+            if(e.keyCode == (49 + this.props.bonusQuestion.correctAnswer)) {
+                this.setState({animation: "bg-green-jungle bg-font-green-jungle animated bounce", showGamePoint: <GamePoint point={this.props.bonusQuestion.gamePoints}/>});
                 this.playAudio("check-right");
             } else {
                 this.setState({animation: "bg-red-mint bg-font-red-mint animated shake"});
@@ -55,17 +56,17 @@ var BonusQuestion = React.createClass({
         }
         
         return ( 
-            <div>
+            <div className="col-md-12">
                 <div className="row justify-content-center marginTop5 animated zoomIn" style={styles.centerIt}>
                     <div className="col-4 text-center">
                         <h1 className="animated fadeInUp" >BONUS QUESTION!</h1>
                     </div>
                 </div>
                 <div className="row justify-content-center animated zoomIn" style={styles.centerIt}>
-                    <div className="col-4 text-center">
-                        <h2 className="animated fadeInUp font-green-sharp">
-                            {this.props.question}
-                        </h2>
+                    <div className="col-10 text-center">
+                        <h3 className="animated fadeInUp font-green-sharp">
+                            {this.props.bonusQuestion.question}
+                        </h3>
                     </div>
                 </div>
                 <div className={"row justify-content-center "}  >
@@ -80,15 +81,14 @@ var BonusQuestion = React.createClass({
                         </div>
                     </div>
                 </div>
+                {this.state.showGamePoint}
             </div>
         );
     }
 });
 BonusQuestion.propTypes = {
     onGameStateChange: PropTypes.func.isRequired,
-    question: PropTypes.string.isRequired,
-    candidates: PropTypes.array.isRequired,
-    correctAnswer: PropTypes.number.isRequired,
+    bonusQuestion: PropTypes.object.isRequired
 };
 
 var styles = {

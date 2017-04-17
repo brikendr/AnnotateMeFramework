@@ -5,13 +5,15 @@ var PropTypes = React.PropTypes,
     assets = require('../../../utils/constatns').assets,
     calculateWPM = require('../../../utils/globalFunctions').caluclateWPM,
     GamePoint = require('./GamePoint'),
-    assetsDir = require('../../../utils/constatns').assets;
+    constants = require('../../../utils/constatns'),
+    BonusQuestionAlgorithm = require('../../../utils/BonusQuestionAlgo');
 
 var StateTyping = React.createClass({
     getInitialState: function() {
         return {
             started: false,
             startTimespan: null,
+            wordStartTimespan: null,
             currentWordIndex: 0,
             currentWord:    <button className="btn sbold btn-circle btn-lg animated zoomIn">{this.props.words[0]}</button>,
             previousWord:   "",
@@ -20,7 +22,7 @@ var StateTyping = React.createClass({
             nextCharToReveal: 0,
             characterElements: [],
             inputText: "",
-            speedometerDegree:  Math.round(0*180/120)-45,
+            speedometerDegree:  Math.round(0*180/constants.maximumSpeed)-45,
             wpm: 0,
             isEntityRevealed: false,
             showGamePoint: null,
@@ -35,12 +37,13 @@ var StateTyping = React.createClass({
         this.setState({
             characterElements: charElements
         });
+        BonusQuestionAlgorithm.init(this.props.words);
     },
     hanldeFastType(e) {
         if(e.keyCode == 32) {
             var currentText = this.state.inputText.trim();
             var displayWord = this.props.words[this.state.currentWordIndex];
-            if(currentText === displayWord) {
+            if(currentText.toUpperCase() === displayWord.toUpperCase()) {
                 //Display Next Word
                 nextIndex = this.state.currentWordIndex + 1;
                 if(nextIndex >= this.props.words.length) {
@@ -53,10 +56,11 @@ var StateTyping = React.createClass({
                         hideActionBtn: ""
                     });
                 } else {
+                    var nextWord = this.props.words[nextIndex + 1] == null ? "": <button className="btn sbold btn-circle btn-xs grey-salsa animated slideInRight">{this.props.words[nextIndex + 1].toLowerCase()}</button>;
                     this.setState({
-                        currentWord:    <button className="btn sbold btn-circle btn-lg animated slideInRight">{this.props.words[nextIndex]}</button>,
-                        previousWord:   <button className="btn sbold btn-circle btn-xs green-jungle animated slideInRight">{this.props.words[nextIndex - 1]}</button>,
-                        nextWord:       <button className="btn sbold btn-circle btn-xs grey-salsa animated slideInRight">{this.props.words[nextIndex + 1]}</button>,
+                        currentWord:    <button className="btn sbold btn-circle btn-lg animated slideInRight">{this.props.words[nextIndex].toLowerCase()}</button>,
+                        previousWord:   <button className="btn sbold btn-circle btn-xs green-jungle animated slideInRight">{this.props.words[nextIndex - 1].toLowerCase()}</button>,
+                        nextWord:       nextWord,
                         inputText: "",
                         currentWordIndex: nextIndex
                     });
@@ -66,27 +70,41 @@ var StateTyping = React.createClass({
             } else {
                 //make a red background 
                 this.setState({
-                    currentWord: <button className="btn sbold btn-circle btn-lg red-mint animated shake">{this.props.words[this.state.currentWordIndex]}</button>,
+                    currentWord: <button className="btn sbold btn-circle btn-lg red-mint animated shake">{this.props.words[this.state.currentWordIndex].toLowerCase()}</button>,
                     inputText: currentText
                 });
                 this.playAudio("check-wrong");
+                BonusQuestionAlgorithm.incrementWrongCounter();
             }
             
+
+            //refresh word timespan timer 
+            BonusQuestionAlgorithm.setWordsWithTimer(this.state.currentWordIndex, this.state.wordStartTimespan, new Date().getTime());
+            this.setState({wordStartTimespan: new Date().getTime()});
         } else {
             this.setState({
-                currentWord: <button className="btn sbold btn-circle btn-lg">{this.props.words[this.state.currentWordIndex]}</button>
+                currentWord: <button className="btn sbold btn-circle btn-lg">{this.props.words[this.state.currentWordIndex].toLowerCase()}</button>
             });
         }
     },
-    calculateCurrentSpeed(currentTime){
+    calculateCurrentSpeed(currentTime, lastCalculation){
         var wordsPerMin = calculateWPM(this.state.currentWordIndex, currentTime, this.state.startTimespan);
         
-        updatedSpeed = Math.round(wordsPerMin*180/120)-45;
-        
+        updatedSpeed = Math.round(wordsPerMin*180/constants.maximumSpeed)-45;
         this.setState({
             wpm:  wordsPerMin,
             speedometerDegree: updatedSpeed
         });
+        if (lastCalculation) {
+            setTimeout(function() {
+                //Get the bonus question 
+                var questionObj = BonusQuestionAlgorithm.selectRandomQuestion();
+                //Set Typing Stats
+                this.props.setTypingStats({wpm: this.state.wpm}, this.state.characterElements, questionObj);
+                this.unbindListeners();
+            }.bind(this), 100);
+            
+        }
     },
     handleCharacterReveal(){
         var currentWordIndex = this.state.currentWordIndex + 1;
@@ -99,7 +117,7 @@ var StateTyping = React.createClass({
 
         if(currentWordIndex == (accumulatedRevCount + wordsPerCharacter)) {
             //reveal character in order 
-            elements[nextCharToReveal] = <button key={nextCharToReveal} type="button" className="btn uppercase btn-circle green btn-outline animated flipInX ">{this.props.entityToReveal.charAt(nextCharToReveal)}</button>;
+            elements[nextCharToReveal] = <button key={nextCharToReveal} type="button" className="btn btn-circle green btn-outline animated flipInX ">{this.props.entityToReveal.charAt(nextCharToReveal)}</button>;
             
             this.setState({
                 characterElements: elements,
@@ -110,31 +128,30 @@ var StateTyping = React.createClass({
         
         if(currentWordIndex >= totalWords && nextCharToReveal <= elements.length - 1) {
             for(var i= nextCharToReveal; i < elements.length; i++) {
-                elements[i] = <button key={i} type="button" className="btn uppercase btn-circle green btn-outline animated flipInX ">{this.props.entityToReveal.charAt(i)}</button>;
+                elements[i] = <button key={i} type="button" className="btn btn-circle green btn-outline animated flipInX ">{this.props.entityToReveal.charAt(i)}</button>;
             
                 this.setState({
                     characterElements: elements
                 });
             }
             this.setState({isEntityRevealed: true, currentWordIndex: currentWordIndex, showGamePoint: <GamePoint point={10}/>});
-            this.calculateCurrentSpeed(new Date().getTime());
-            this.props.setTypingStats({wpm: this.state.wpm}, this.state.characterElements);
-            this.unbindListeners();
+            this.calculateCurrentSpeed(new Date().getTime(), true);
         }
     },
     unbindListeners() {
         setTimeout(function () {
-            this.props.onGameStateChange("BONUS_QUESTION");
+            this.props.onGameStateChange(this.props.nextScreen);
         }.bind(this), 3000);
     },
     handleInputChange(event) {
         if(this.state.started == false && event.target.value.trim() != "") {
             this.setState({
                 started: true,
-                startTimespan: new Date().getTime()
+                startTimespan: new Date().getTime(),
+                wordStartTimespan: new Date().getTime()
             });
             var refreshId = setInterval(function() {
-                this.calculateCurrentSpeed(new Date().getTime());
+                this.calculateCurrentSpeed(new Date().getTime(), false);
                 if (this.state.isEntityRevealed) {
                     clearInterval(refreshId);
                 }
@@ -155,7 +172,7 @@ var StateTyping = React.createClass({
             transform: degrees 
         }
         return ( 
-            <div>
+            <div className="col-md-10">
                 <div className={"row justify-content-center marginTop5"}  >
                     <div className="col-5 text-center">
                         <div className="clearfix">
@@ -168,7 +185,7 @@ var StateTyping = React.createClass({
                 <div className="row justify-content-center margin-top-10">
                     <div className="col-4 text-center">
                         <audio src="https://s3.amazonaws.com/freecodecamp/simonSound2.mp3" id="check-right"></audio>
-                        <audio src={assetsDir+"/audio/Button-sound-wrong.mp3"} id="check-wrong"></audio>
+                        <audio src={constants.assets+"/audio/Button-sound-wrong.mp3"} id="check-wrong"></audio>
                         {this.state.previousWord} &nbsp;
                         {this.state.currentWord} &nbsp;
                         {this.state.nextWord}
@@ -197,7 +214,7 @@ var StateTyping = React.createClass({
                     </div>
                 </div>
 
-                {this.state.showGamePoint}
+                {this.props.shouldPlayGamePoint ? this.state.showGamePoint:""}
             </div>
         );
     }
@@ -207,6 +224,8 @@ StateTyping.propTypes = {
     setTypingStats: PropTypes.func.isRequired,
     words: PropTypes.array.isRequired,
     entityToReveal: PropTypes.string.isRequired,
+    shouldPlayGamePoint: PropTypes.bool.isRequired,
+    nextScreen: PropTypes.string.isRequired
 };
 
 var styles = {

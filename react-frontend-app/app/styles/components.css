@@ -21705,6 +21705,18 @@ Color library demo
     margin-left: auto;
     margin-right: auto }
 
+.marginTop1 {
+  margin-top: 1%;
+}
+.marginTop2 {
+  margin-top: 2%;
+}
+.marginTop3 {
+  margin-top: 3%;
+}
+.marginTop4 {
+  margin-top: 4%;
+}
 .marginTop5 {
   margin-top: 5%;
 }

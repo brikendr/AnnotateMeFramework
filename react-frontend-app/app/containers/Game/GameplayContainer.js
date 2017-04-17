@@ -21,7 +21,8 @@ var GameplayContainer = React.createClass({
             currentGameState: "TYPING",
             possibleGameStates: ["TYPING", "BONUS_QUESTION", "RESOLVING_ENTITY", "BETTING", "POINTS_CHALLENGE", "COMPLETED"],
             wpm: 0,
-            charElements: []
+            charElements: [],
+            bonusQuestion: {}
         }
     },
     propTypes:{
@@ -53,11 +54,12 @@ var GameplayContainer = React.createClass({
             });
         }
     },
-    handleStats(stats, charElementsStyled) {
+    handleStats(stats, charElementsStyled, bonusQuestionObj) {
         //TODO: save stats to db 
         this.setState({
             wpm: stats.wpm,
-            charElements: charElementsStyled
+            charElements: charElementsStyled,
+            bonusQuestion: bonusQuestionObj
         });
     },
     challengePlayers(playersToChallenge) {
@@ -76,16 +78,17 @@ var GameplayContainer = React.createClass({
                 screenToShow= <StateTyping 
                     onGameStateChange={this.changeGameState} 
                     setTypingStats={this.handleStats} 
-                    words={["test", "hello", "second"]}
-                    entityToReveal="JOHNNY" />
+                    words={["The","quick", "brown", "fox", "dog" , "jumps", "over", "fox" ,"lazy", "dog", "when", "fox", "dog", "MTV", "ax", "quiz", "fox", "dog", "prog", "Junk", "fox", "dog", "MTV", "quiz", "graced", "by", "fox"]}
+                    entityToReveal="JOHNNY"
+                    shouldPlayGamePoint={true}
+                    nextScreen="BONUS_QUESTION" />
                     break;
             }
             case "BONUS_QUESTION": {
                 screenToShow= <BonusQuestion 
                     onGameStateChange={this.changeGameState} 
-                    question="Who is the president of united states"
-                    candidates={["Barack Obama", "Bill Clinton", "George Bush", "Donald Trump"]}
-                    correctAnswer={4} />
+                    bonusQuestion={this.state.bonusQuestion}
+                    />
                     break;
             }
             case "RESOLVING_ENTITY": {
@@ -101,7 +104,7 @@ var GameplayContainer = React.createClass({
                 screenToShow = <ChallengeScreen 
                     onGameStateChange={this.changeGameState}
                     challengePlayers={this.challengePlayers}
-                    wpm={30}
+                    wpm={this.state.wpm}
                     />;
                 break;
             } case "COMPLETED": {
@@ -117,11 +120,11 @@ var GameplayContainer = React.createClass({
             this.props.fetchingData ? 
             <GameLoadingGif />
             :
-            <div>
-                {screenToShow}
-
+            <div className="col-md-12">
+                <div className="row justify-content-center">
+                    {screenToShow}
+                </div>
                 <audio src={assetsDir+"/audio/Funky-guitar-logo.mp3"} id="finishRound"></audio>
-                <LevelUp />
             </div>
         )
     }

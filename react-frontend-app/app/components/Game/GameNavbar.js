@@ -1,6 +1,7 @@
 require('../../styles/hamburgerNav.css');
 var React = require('react'),
-    PropTypes = React.PropTypes;
+    PropTypes = React.PropTypes,
+    Link = require('react-router').Link;
 
 function GameNavbar(props) {
     return (
@@ -16,9 +17,15 @@ function GameNavbar(props) {
                                 <span className="hamburger hamburger-3"></span>
                             </label>
                             
-                            <a href="#" className="menu-item"> <i className="fa fa-home"></i> </a>
-                            <a href="#" className="menu-item"> <i className="fa fa-user"></i> </a>
-                            <a href="#" className="menu-item"> <i className="fa fa-rocket"></i> </a>
+                            <Link to='/' className="menu-item">
+                                <i className="fa fa-home"></i>
+                            </Link>
+                            <Link to='/profile' className="menu-item">
+                                <i className="fa fa-user"></i>
+                            </Link>
+                            <Link to='/leaderboard' className="menu-item">
+                                <i className="fa fa-rocket"></i>
+                            </Link>
                             <a href="#" onClick={props.logoutUser} className="menu-item"> <i className="fa fa-sign-out"></i> </a>
                         </nav>
                     </div>

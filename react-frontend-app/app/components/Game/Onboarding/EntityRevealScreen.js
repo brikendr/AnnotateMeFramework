@@ -4,7 +4,7 @@ var React = require('react'),
     Candidate = require('../Candidate'),
     calculateWPM = require('../../../utils/globalFunctions').caluclateWPM,
     GameClue = require('../GameClues');
-require('../../../styles/stickynotes.css');
+
 
 var EntityRevealScreen = React.createClass({
     getInitialState: function() {
@@ -27,6 +27,7 @@ var EntityRevealScreen = React.createClass({
         }
     },
     componentDidMount() {
+        require('../../../styles/stickynotes.css');
         var entityCharacters = this.state.entityToReveal.split('');
         var charElements = [];
         for(var i = 0; i<entityCharacters.length; i++){
@@ -216,7 +217,7 @@ var EntityRevealScreen = React.createClass({
                     </div>
                 </div>
                 <div className={this.state.didFinishRound ? "":"hidden"}>
-                    <SpaceActionBtn />
+                    <SpaceActionBtn command="SPACE" message="Hit SPACE to Continue" divSize={12}/>
                 </div>
             </div>
         );

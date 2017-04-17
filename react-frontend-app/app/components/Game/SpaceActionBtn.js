@@ -4,16 +4,13 @@ var PropTypes = React.PropTypes
 
 function SpaceActionBtn(props) {
     return (
-        <div>
-            <div className="row justify-content-center animated fadeInDown margin-top-10">
-                <div className="col-4">
-                    <img src={assetsDir + "img/spacebar.png"} width="100%"/>
-                    
-                </div>
-            </div>
-            <div className="row justify-content-center animated bounce">
-                <div className="col-4 text-center">
-                    {props.message == null ? "Hit Space to Continue":props.message}
+        <div className={props.divSize == null ? "col-md-6":"col-md-"+props.divSize}>
+            <div className="form-actions">
+                <div className="row justify-content-center">
+                    <div className="col-md-6">
+                        <p className="text-display">{props.command == null ? "SPACE":props.command}</p>
+                        <h5>{props.message == null ? "Hit Space to Continue":props.message}</h5>
+                    </div>
                 </div>
             </div>
         </div>

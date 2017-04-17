@@ -109,7 +109,7 @@ var WaveScreen = React.createClass({
                     </div>
                 </div>
                 <div className={this.state.hideActionBtn}>
-                    <SpaceActionBtn />
+                    <SpaceActionBtn command="SPACE" message="Hit SPACE to Continue" divSize={12}/>
                 </div>
             </div>
         );

@@ -72,12 +72,11 @@ var GameHomeContainer = React.createClass({
                 alert('8');
                 break;
             }
-            case 32: {
-                var randomCategory = Math.floor((Math.random() * this.state.mappedCategories.length));
-                var selectedCategory = this.state.mappedCategories[randomCategory];
-                console.log('SELECTED CATEGORY IS ', selectedCategory);
-                this.redirectGame('play');
-            }
+        }
+        if (e.ctrlKey && e.keyCode == 32) {
+            var randomCategory = Math.floor((Math.random() * this.state.mappedCategories.length));
+            var selectedCategory = this.state.mappedCategories[randomCategory];
+            this.redirectGame('play');
         }
     },
     redirectGame(path) {
@@ -91,7 +90,7 @@ var GameHomeContainer = React.createClass({
             <GameLoadingGif />
             :
             <div>
-                <div className="container col-md-12 marginTop5">
+                <div className="container col-md-12 marginTop3">
                     <div className="row justify-content-center">
                         <div className="col-md-8">
                             <div className="row">
@@ -102,9 +101,8 @@ var GameHomeContainer = React.createClass({
                         <div className="col-md-3">
                             <PlayerGameStats wps={30} points={120} levelName="Newbie" progress={80} />
                         </div>
-                        <div className="col-md-6">
-                            <SpaceActionBtn message="Hit SPACE to start random game"/>
-                        </div>
+                        
+                        <SpaceActionBtn command="CTRL + SPACE" message="Start random Game" />
                     </div>
                 </div>
                 

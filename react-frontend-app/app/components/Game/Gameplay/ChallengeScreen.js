@@ -1,7 +1,8 @@
 var React = require('react'),
     PropTypes = React.PropTypes,
     assets = require('../../../utils/constatns').assets,
-    Challengers = require('./Challengers');
+    Challengers = require('./Challengers'),
+    SpaceBtn = require('../../../components/Game/SpaceActionBtn');
 
 var ChallengeScreen = React.createClass({
     getInitialState: function() {
@@ -66,89 +67,82 @@ var ChallengeScreen = React.createClass({
     },
     render() {
         return (
-            
-            <div className="row justify-content-center marginTop5 animated zoomIn">
-                <div className="col-md-6">
-                    <div className="portlet light">
-                        <div className="portlet-title bg-green-haze bg-font-green-haze" style={styles.portletTitle}>
-                            <p className="caption bold uppercase font-white" style={{float: 'inherit'}}> Challenge Time! </p>
-                        </div>
-                        <div className="portlet-body">
-                            <div className="box" style={{background: 'none', width: '100%'}}>
-                                <div className="box__body">
+            <div className="col-md-12">
+                <div className="row justify-content-center marginTop5 animated zoomIn">
+                    <div className="col-md-6">
+                        <div className="portlet light">
+                            <div className="portlet-title bg-green-haze bg-font-green-haze" style={styles.portletTitle}>
+                                <p className="caption bold uppercase font-white" style={{float: 'inherit'}}> Challenge Time! </p>
+                            </div>
+                            <div className="portlet-body">
+                                <div className="box" style={{background: 'none', width: '100%'}}>
+                                    <div className="box__body">
 
-                                    <div className="stats stats--main font-green-haze">
-                                        <div className="stats__caption">Challenging Speed</div>
-                                        <div className="stats__amount">12 <small>wpm</small></div>
-                                    </div>
-
-                                    <div className="stats stats--main font-green-haze">
-                                        <div className="stats__caption">Game Category</div>
-                                        <div className="stats__amount">Arts</div>
-                                    </div>
-
-                                    <div className="stats stats--main font-green-haze">
-                                        <div className="stats__caption">Accumulated Points</div>
-                                        <div className="stats__amount">
-                                            <audio src="https://s3.amazonaws.com/freecodecamp/simonSound4.mp3" id="sound-3"></audio>
-                                            <form>
-                                                <input type="range" value={this.state.challengedPoints}/>
-                                                <h5 className="bold uppercase">{this.state.challengedPoints / 10 + (this.state.challengedPoints > 10 ? " Points":" Point")} </h5>
-                                            </form>
+                                        <div className="stats stats--main font-green-haze">
+                                            <div className="stats__caption">Challenging Speed</div>
+                                            <div className="stats__amount">{this.props.wpm} <small>wpm</small></div>
                                         </div>
-                                        <h5>Use Left - Right arrow to change value</h5>
-                                    </div>
 
-                                    <div className="stats stats--main font-green-haze">
-                                        <div className="stats__caption">Potential Challengers</div>
-                                        <div className="stats__amount">
-                                            <div className={"row justify-content-center "}  >
-                                                <div className="col-10 text-center">
-                                                    <div className="clearfix">
-                                                        <div className="row justify-content-center">
-                                                            <Challengers   name="Brikend Rama"
-                                                                wpm={34}
-                                                                number={1} 
-                                                                toggleChallengerFromList={this.toggleChallengerFromList}
-                                                                />
-                                                            <Challengers   name="Ardit Dika"
-                                                                wpm={28}
-                                                                number={2}
-                                                                toggleChallengerFromList={this.toggleChallengerFromList}
-                                                                />
-                                                            <Challengers   name="Bjorn Hermansen"
-                                                                wpm={38}
-                                                                number={3} 
-                                                                toggleChallengerFromList={this.toggleChallengerFromList}
-                                                                />
-                                                            <Challengers   name="Sondre Trydal"
-                                                                wpm={57}
-                                                                number={4}
-                                                                toggleChallengerFromList={this.toggleChallengerFromList} 
-                                                                />
+                                        <div className="stats stats--main font-green-haze">
+                                            <div className="stats__caption">Game Category</div>
+                                            <div className="stats__amount">Arts</div>
+                                        </div>
+
+                                        <div className="stats stats--main font-green-haze">
+                                            <div className="stats__caption">Accumulated Points</div>
+                                            <div className="stats__amount">
+                                                <audio src="https://s3.amazonaws.com/freecodecamp/simonSound4.mp3" id="sound-3"></audio>
+                                                <form>
+                                                    <input type="range" value={this.state.challengedPoints}/>
+                                                    <h5 className="bold uppercase">{this.state.challengedPoints / 10 + (this.state.challengedPoints > 10 ? " Points":" Point")} </h5>
+                                                </form>
+                                            </div>
+                                            <h5>Use Left - Right arrow to change value</h5>
+                                        </div>
+
+                                        <div className="stats stats--main font-green-haze">
+                                            <div className="stats__caption">Potential Challengers</div>
+                                            <div className="stats__amount">
+                                                <div className={"row justify-content-center "}  >
+                                                    <div className="col-10 text-center">
+                                                        <div className="clearfix">
+                                                            <div className="row justify-content-center">
+                                                                <Challengers   name="Brikend Rama"
+                                                                    wpm={34}
+                                                                    number={1} 
+                                                                    toggleChallengerFromList={this.toggleChallengerFromList}
+                                                                    />
+                                                                <Challengers   name="Ardit Dika"
+                                                                    wpm={28}
+                                                                    number={2}
+                                                                    toggleChallengerFromList={this.toggleChallengerFromList}
+                                                                    />
+                                                                <Challengers   name="Bjorn Hermansen"
+                                                                    wpm={38}
+                                                                    number={3} 
+                                                                    toggleChallengerFromList={this.toggleChallengerFromList}
+                                                                    />
+                                                                <Challengers   name="Sondre Trydal"
+                                                                    wpm={57}
+                                                                    number={4}
+                                                                    toggleChallengerFromList={this.toggleChallengerFromList} 
+                                                                    />
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                </div>
-                            </div>
-                            <div className="form-actions">
-                                <div className="row justify-content-center">
-                                    <div className="col-md-6">
-                                        <p className="text-display">CTRL + SPACE</p>
-                                        <h5>Use Command to Complete Challenge</h5>
                                     </div>
-                                    
                                 </div>
+                                <SpaceBtn command="CTRL + SPACE" message="Complete Challenge" divSize={12}/>
                             </div>
-                            
                         </div>
                     </div>
                 </div>
             </div>
+            
         );
     }
 });
