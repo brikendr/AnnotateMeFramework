@@ -2,6 +2,7 @@ var React = require('react');
 var PropTypes = React.PropTypes;
 var SpaceActionBtn = require('../SpaceActionBtn');
 var GameHelper = require('../../../utils/GameHelper');
+var assetsDir = require('../../../utils/constatns').assets;
 
 var RewardScreen = React.createClass({
     getInitialState: function() {
@@ -15,6 +16,8 @@ var RewardScreen = React.createClass({
     },
     componentDidMount() {
         document.addEventListener("keydown", this.handleLocalSpacePress, false);
+        var audio = document.getElementById("reward-sound");		
+        audio.play();
     },
     handleLocalSpacePress(e) {
         if(e.ctrlKey && e.keyCode == 32){
@@ -29,8 +32,10 @@ var RewardScreen = React.createClass({
                 });
             } else {
                 GameHelper.registerPlayer({
-                    'username': this.state.username,
-                    'password': this.state.password
+                    'username': this.state.username.trim(),
+                    'password': this.state.password,
+                    'points': 20,
+                    'wpm': Math.round(this.props.playerWpm)
                 }).then(function(response){
                     if(response.status == 200) {
                         this.props.redirectHome();
@@ -56,8 +61,9 @@ var RewardScreen = React.createClass({
     },
     render() {
         return ( 
-            <div>
-                <div className="row justify-content-center animated zoomIn" style={styles.centerIt}>
+            <div className="col-md-12">
+                <audio src={assetsDir+"/audio/Winning-sound-effect.mp3"} id="reward-sound"></audio>
+                <div className="row justify-content-center marginTop5 animated zoomIn" >
                     <div className="col-xs-6  text-center">
                         <div className="mt-element-ribbon bg-grey-steel">
                             <div className="ribbon ribbon-border-hor ribbon-clip ribbon-color-danger uppercase">
@@ -95,7 +101,8 @@ var RewardScreen = React.createClass({
 });
 RewardScreen.propTypes = {
   onFinishWave: PropTypes.func.isRequired,
-  redirectHome: PropTypes.func.isRequired
+  redirectHome: PropTypes.func.isRequired,
+  playerWpm: PropTypes.number.isRequired
 };
 
 var styles = {

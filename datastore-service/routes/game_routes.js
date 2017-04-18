@@ -31,8 +31,11 @@ router.post('/authenticate', function(req, res, next) {
 //Register Player
 router.post('/register', function(req, res, next) {
     var username = req.body.username,
-        password = req.body.password;
-
+        password = req.body.password,
+        points   = req.body.points,
+        playerWpm = req.body.wpm;
+    
+    //check if the player exists
     models.Player.find({
         where: {
             username: username,
@@ -45,15 +48,26 @@ router.post('/register', function(req, res, next) {
                 "errorMsg": "Username is taken!"
             });
         } else {
+            //Register new player
             models.Player.create({
                 username: username,
                 password: password,
+                points: points,
                 LevelId: 1
             }).then(function(result){
-                //Return Response
-                res.json({
-                    "status": 200,
-                    "resource": result
+                var PlayerData = result;
+
+                //Register Player Initial Stats 
+                models.Playerstats.create({
+                    current_wps: playerWpm,
+                    PlayerId: PlayerData.id
+                }).then(function(stats){
+
+                    //Return Response
+                    res.json({
+                        "status": 200,
+                        "resource": PlayerData
+                    });
                 });
             });
         }
@@ -72,5 +86,33 @@ router.get('/categories', function(req, res, next){
             "resource": result
         });
     });
-})
+});
+
+router.get('/playerStats/:id',function(req, res, next){
+    var playerID = req.params.id;
+    models.Playerstats.find({
+        where: {
+            PlayerId: playerID
+        },
+        include: [models.Player]
+    }).then(function(playerStatistics) {
+        playerStatistics.Player.getLevel();
+
+        //getLevel OBJ
+        models.Level.find({
+            where: {
+                id: playerStatistics.Player.LevelId
+            }
+        }).then(function(levelObj){
+            res.json({
+                "status": 200,
+                "resource": {
+                    'stats': playerStatistics,
+                    'level': levelObj
+                }
+            });
+        })
+        
+    });
+});
 module.exports = router;

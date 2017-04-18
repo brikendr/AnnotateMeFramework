@@ -13,7 +13,8 @@ var BetModal = React.createClass({
             <div className="modal" style={{height: '520px'}}>
                 <div className="head">
                     <h3 className="bold font-white">Betting Time!</h3>
-                    </div>
+                    <h5 className="font-white">Press ESC to exit</h5>
+                </div>
                 <div className="content">
                         <h4 className="font-green-haze"> <strong>Feeling confident about your answer?</strong></h4>
                         <h5>Bet 0-10 points below, If other players select the same answer as you, the points are yours.</h5>

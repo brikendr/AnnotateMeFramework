@@ -3,10 +3,11 @@ var React = require('react'),
     PropTypes = React.PropTypes;
 
 function PlayerGameStats(props) {
+    console.log(props.player);
     return (
         <div className="box">
             <div className="box__header">
-                <h3 className="box__header-title">Game Statistics</h3>
+                <h3 className="box__header-title">Game Statistics [{props.player.username}]</h3>
             </div>
             <div className="box__body">
                 <div className="stats stats--main">
@@ -35,6 +36,7 @@ PlayerGameStats.propTypes = {
     wps: PropTypes.number.isRequired,
     points: PropTypes.number.isRequired,
     levelName: PropTypes.string.isRequired,
-    progress: PropTypes.number.isRequired
+    progress: PropTypes.number.isRequired,
+    player: PropTypes.object.isRequired
 }
 module.exports = PlayerGameStats;

@@ -27,7 +27,8 @@ var OnBoardingContainer = React.createClass({
             ],
             hasFinishedRound: false,
             screenOneState: 1,
-            screenTwoState: 1
+            screenTwoState: 1,
+            playerWpm: 0
         }
     },
     handleChangeScreen(newScreenNr, nextScreen,hasFinished) {
@@ -36,6 +37,16 @@ var OnBoardingContainer = React.createClass({
             nextScreen: nextScreen,
             hasFinishedRound: hasFinished == null ? true:hasFinished
         })
+    },
+    setPlayerStats(statsObj) {
+        var playerWpm = this.state.playerWpm,
+            newWpm = 0;
+        if(playerWpm == 0) {
+            newWpm = statsObj.wpm;
+        } else {
+            newWpm = (playerWpm + statsObj.wpm) / 2; //average from two typing sessions
+        }
+        this.setState({playerWpm: newWpm})
     },
     handleSpaceClick(e) {
         var scNr = this.state.screenNr;
@@ -47,7 +58,7 @@ var OnBoardingContainer = React.createClass({
                     screenNr: 1,
                     screenOneState: screenOneNext,
                     hasFinishedRound: finishedRoundOne,
-                    currentScreen: <WaveScreen words={this.state.wave1Words} onFinishWave={this.handleSpaceClick} changeScreenNr={this.handleChangeScreen} />
+                    currentScreen: <WaveScreen words={this.state.wave1Words} onFinishWave={this.handleSpaceClick} changeScreenNr={this.handleChangeScreen} setPlayerStats={this.setPlayerStats} />
                 });
             }
             else if(this.state.screenOneState == 4 && this.state.screenTwoState == 1) {
@@ -62,12 +73,12 @@ var OnBoardingContainer = React.createClass({
                 this.setState({
                     screenNr: 3,
                     hasFinishedRound: false,
-                    currentScreen: <EntityRevealScreen words={this.state.wave2Words} onFinishWave={this.handleSpaceClick} changeScreenNr={this.handleChangeScreen} />
+                    currentScreen: <EntityRevealScreen words={this.state.wave2Words} onFinishWave={this.handleSpaceClick} changeScreenNr={this.handleChangeScreen} setPlayerStats={this.setPlayerStats}/>
                 });
             } else if(scNr == 4) {
                 this.setState({
                         hasFinishedRound: false,
-                        currentScreen: <RewardScreen onFinishWave={this.handleSpaceClick} redirectHome={this.handleRedirectHome} />
+                        currentScreen: <RewardScreen onFinishWave={this.handleSpaceClick} redirectHome={this.handleRedirectHome} playerWpm={this.state.playerWpm} />
                     });
             }
         }

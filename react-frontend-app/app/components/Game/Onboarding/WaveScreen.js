@@ -1,7 +1,9 @@
 var React = require('react');
     PropTypes = React.PropTypes;
     SpaceActionBtn = require('../SpaceActionBtn'),
-    calculateWPM = require('../../../utils/globalFunctions').caluclateWPM;
+    calculateWPM = require('../../../utils/globalFunctions').caluclateWPM,
+    GamePoint = require('../Gameplay/GamePoint'),
+    assetsDir = require('../../../utils/constatns').assets;
 
 var WaveScreen = React.createClass({
     getInitialState: function() {
@@ -16,7 +18,8 @@ var WaveScreen = React.createClass({
             inputText: "",
             stats: "",
             hideInputField: "",
-            hideActionBtn: "hidden"
+            hideActionBtn: "hidden",
+            showGamePoint: null,
         }
     },
     hanldeFastType(e) {
@@ -34,7 +37,8 @@ var WaveScreen = React.createClass({
                         inputText: "",
                         hideInputField: "hidden",
                         hideActionBtn: "",
-                        currentWordIndex: nextIndex
+                        currentWordIndex: nextIndex,
+                        showGamePoint: <GamePoint point={10}/>
                     });
                     this.generateStats(new Date().getTime());
                 } else {
@@ -46,9 +50,10 @@ var WaveScreen = React.createClass({
                         currentWordIndex: nextIndex
                     });
                 }
-                
+                this.playAudio("check-right");
             } else {
                 //make a red background 
+                this.playAudio("check-wrong");
                 this.setState({
                     currentWord: <button className="btn sbold btn-circle btn-lg red-mint animated shake">{this.state.words[this.state.currentWordIndex]}</button>,
                     inputText: currentText
@@ -77,6 +82,11 @@ var WaveScreen = React.createClass({
             stats: <span>Your Speed: <strong>{Math.round(wpm)}</strong> WPM (words per minute)</span>
         });
         this.props.changeScreenNr(1);
+        this.props.setPlayerStats({'wpm': wpm});
+    },
+    playAudio(soundID) {
+        var audio = document.getElementById(soundID);		
+        audio.play();
     },
     render() {
         return ( 
@@ -90,6 +100,8 @@ var WaveScreen = React.createClass({
                 </div>
                 <div className="row justify-content-center margin-top-10">
                     <div className="col-4 text-center">
+                        <audio src="https://s3.amazonaws.com/freecodecamp/simonSound2.mp3" id="check-right"></audio>
+                        <audio src={assetsDir+"/audio/Button-sound-wrong.mp3"} id="check-wrong"></audio>
                         {this.state.previousWord} &nbsp;
                         {this.state.currentWord} &nbsp;
                         {this.state.nextWord}
@@ -111,6 +123,8 @@ var WaveScreen = React.createClass({
                 <div className={this.state.hideActionBtn}>
                     <SpaceActionBtn command="SPACE" message="Hit SPACE to Continue" divSize={12}/>
                 </div>
+
+                {this.state.showGamePoint}
             </div>
         );
     }
@@ -118,7 +132,8 @@ var WaveScreen = React.createClass({
 WaveScreen.propTypes = {
   words: PropTypes.array.isRequired,
   onFinishWave: PropTypes.func.isRequired,
-  changeScreenNr: PropTypes.func.isRequired
+  changeScreenNr: PropTypes.func.isRequired,
+  setPlayerStats: PropTypes.func.isRequired
 };
 
 var styles = {

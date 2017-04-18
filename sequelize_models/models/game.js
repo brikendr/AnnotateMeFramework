@@ -5,7 +5,9 @@ module.exports = function(sequelize, DataTypes) {
         wps: DataTypes.INTEGER,
         accuracy: DataTypes.INTEGER,
         typing_paragraph: { type: DataTypes.TEXT('long'), allowNull: false},
-        betscore: DataTypes.INTEGER
+        betscore: DataTypes.INTEGER,
+        isBetValidated: { type: DataTypes.BOOLEAN, defaultValue: true},
+        betWon: DataTypes.BOOLEAN
     }, {
         classMethods: {
             associate: function(models) {
@@ -14,9 +16,6 @@ module.exports = function(sequelize, DataTypes) {
 
                 //Relationship with Candidate
                 Game.belongsTo(models.Candidate);
-
-                //Relationship with Playerbets 
-                Game.hasOne(models.Betstats);
 
                 //Relationship with player 
                 Game.belongsTo(models.Player);

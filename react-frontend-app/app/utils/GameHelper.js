@@ -28,6 +28,29 @@ var GameHelper = {
     getCategories: function() {
         return axios.get(MainUrl + 'categories')
         .then(function (response) {
+            console.log(response.data);
+            return response.data;
+        })
+        .catch(function (err) {
+            console.warn('Error in GameHelper:getCategories: ', err);
+        });
+    },
+    getCategoriesAndPlayerStats: function(playerId) {
+        return this.getCategories()
+            .then(function(categories){
+                return this.getPlayerStats(playerId).
+                    then(function(playerStats){
+                        return {
+                            'categories': categories.resource,
+                            'playerStats': playerStats.resource
+                        }
+                    });
+            }.bind(this));
+    },
+    getPlayerStats: function(playerID){
+        return axios.get(MainUrl + 'playerStats/' + playerID)
+        .then(function (response) {
+            console.log(response.data);
             return response.data;
         })
         .catch(function (err) {

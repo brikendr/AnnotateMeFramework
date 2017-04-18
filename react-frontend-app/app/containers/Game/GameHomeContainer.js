@@ -14,19 +14,21 @@ var GameHomeContainer = React.createClass({
     },
     getInitialState: function() {
         return {
-            mappedCategories: []
+            mappedCategories: [],
+            playerStats: null
         }
     },
     propTypes:{
         User: PropTypes.object.isRequired
     },
-    componentDidMount(){
+    componentWillMount(){
         this.props.toggleDataFetching();
-        GameHelper.getCategories()
+        GameHelper.getCategoriesAndPlayerStats(this.props.User.information.id)
         .then(function(response){
-            this.mapCategories(response.resource);
+            this.mapCategories(response.categories);
             this.props.toggleDataFetching();
-        }.bind(this))
+            this.setState({playerStats: response.playerStats});
+        }.bind(this));
         document.addEventListener("keydown", this.commandListener);
     },
     mapCategories(categories) {
@@ -85,6 +87,11 @@ var GameHomeContainer = React.createClass({
     },
     render() {
         var UserData = this.props.User.information;
+        if(this.state.playerStats != null) {
+            var Statistics = this.state.playerStats,
+            levelProgress = Math.round((Statistics.stats.Player.points / Statistics.level.upper_limit) * 100);
+            console.log(Statistics.stats.Player.points, Statistics.level.upper_limit, levelProgress);
+        }
         return (
             this.props.fetchingData ? 
             <GameLoadingGif />
@@ -98,9 +105,13 @@ var GameHomeContainer = React.createClass({
                                 {this.state.mappedCategories}
                             </div>
                         </div>
+                        {this.state.playerStats != null ?
                         <div className="col-md-3">
-                            <PlayerGameStats wps={30} points={120} levelName="Newbie" progress={80} />
+                            <PlayerGameStats wps={Statistics.stats.current_wps} points={Statistics.stats.Player.points} levelName={Statistics.level.name} progress={levelProgress} player={UserData} />
                         </div>
+                        :""
+                        }
+                        
                         
                         <SpaceActionBtn command="CTRL + SPACE" message="Start random Game" />
                     </div>

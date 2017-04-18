@@ -3,7 +3,8 @@ var React = require('react'),
     SpaceActionBtn = require('../SpaceActionBtn'),
     Candidate = require('../Candidate'),
     calculateWPM = require('../../../utils/globalFunctions').caluclateWPM,
-    GameClue = require('../GameClues');
+    GameClue = require('../GameClues'),
+    assetsDir = require('../../../utils/constatns').assets;
 
 
 var EntityRevealScreen = React.createClass({
@@ -23,7 +24,8 @@ var EntityRevealScreen = React.createClass({
             inputText: "",
             isEntityRevealed: false,
             didFinishRound: false,
-            correctAnswer: 1
+            correctAnswer: 1,
+            showGamePoint: null,
         }
     },
     componentDidMount() {
@@ -64,12 +66,14 @@ var EntityRevealScreen = React.createClass({
                     });
                 }
                 this.handleCharacterReveal();
+                this.playAudio("check-right");
             } else {
                 //make a red background 
                 this.setState({
                     currentWord: <button className="btn sbold btn-circle btn-lg red-mint animated shake">{this.state.words[this.state.currentWordIndex]}</button>,
                     inputText: currentText
                 });
+                this.playAudio("check-wrong");
             }
         } else {
             this.setState({
@@ -115,7 +119,8 @@ var EntityRevealScreen = React.createClass({
     handleCandidateSelection(e) {
         if(e.keyCode == (48 + this.state.correctAnswer)) {
             this.setState({
-                didFinishRound: true
+                didFinishRound: true,
+                showGamePoint: <GamePoint point={10}/>
             });
             this.props.changeScreenNr(4);
             this.unbindListeners();
@@ -147,7 +152,11 @@ var EntityRevealScreen = React.createClass({
         this.setState({
             stats: <span>Your Speed: <strong>{Math.round(wpm)}</strong> WPM (words per minute)</span>
         });
-        
+        this.props.setPlayerStats({'wpm': wpm});
+    },
+    playAudio(soundID) {
+        var audio = document.getElementById(soundID);		
+        audio.play();
     },
     render() {
         return ( 
@@ -198,6 +207,8 @@ var EntityRevealScreen = React.createClass({
                 
                 <div className="row justify-content-center margin-top-10">
                     <div className="col-4 text-center">
+                        <audio src="https://s3.amazonaws.com/freecodecamp/simonSound2.mp3" id="check-right"></audio>
+                        <audio src={assetsDir+"/audio/Button-sound-wrong.mp3"} id="check-wrong"></audio>
                         {this.state.previousWord} &nbsp;
                         {this.state.currentWord} &nbsp;
                         {this.state.nextWord}
@@ -219,6 +230,7 @@ var EntityRevealScreen = React.createClass({
                 <div className={this.state.didFinishRound ? "":"hidden"}>
                     <SpaceActionBtn command="SPACE" message="Hit SPACE to Continue" divSize={12}/>
                 </div>
+                {this.state.showGamePoint}
             </div>
         );
     }
@@ -226,7 +238,8 @@ var EntityRevealScreen = React.createClass({
 EntityRevealScreen.propTypes = {
   words: PropTypes.array.isRequired,
   onFinishWave: PropTypes.func.isRequired,
-  changeScreenNr: PropTypes.func.isRequired
+  changeScreenNr: PropTypes.func.isRequired,
+  setPlayerStats: PropTypes.func.isRequired
 };
 
 var styles = {
