@@ -5,7 +5,8 @@ module.exports = function(){
             authenticated: false
         },
         game: {
-			fetchingData: false
+			fetchingData: false,
+			playerStats: {}
 		}
 	};
 };

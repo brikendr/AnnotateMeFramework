@@ -20,7 +20,7 @@ function PlayerGameStats(props) {
                 </div>
 
                 <div className="stats">
-                    <div className="stats__amount">
+                    <div className="stats__amount" style={{fontSize: '25px'}}>
                         <div className="stats__period">Current Level</div>
                         {props.levelName}
                     </div>

@@ -1,6 +1,9 @@
 var React = require('react'),
-    PropTypes = React.PropTypes
-    assetsDir = require('../../../utils/constatns').assets;
+    PropTypes = React.PropTypes,
+    ReactRedux = require("react-redux"),
+    assetsDir = require('../../../utils/constatns').assets,
+    registerPoint = require('../../../utils/GameHelper').registerPoint,
+    gameActions = require('../../../redux/actions/utilActions').setPlayerScore;
 
 var GamePoint = React.createClass({
     getInitialState: function() {
@@ -13,12 +16,20 @@ var GamePoint = React.createClass({
         require('../../../styles/neonShine.css');
         
 		this.playAudio();
-        setTimeout(function() {
-            console.log('animating down');
-            this.setState({pointAnimation: "animated zoomOut"});
-            
-            this.destroyElement();
-        }.bind(this), 2000);
+        //Update Player Score 
+        this.props.setPlayerScore(this.props.point);
+
+        //Update Score in db 
+        var PlayerInfo = this.props.PlayerStats.Player;
+        registerPoint(PlayerInfo.points, PlayerInfo.id).
+            then(function(response) {
+                setTimeout(function() {
+                    console.log('animating down');
+                    this.setState({pointAnimation: "animated zoomOut"});
+                    
+                    this.destroyElement();
+                }.bind(this), 2000);
+            }.bind(this));
     },
     playAudio () {
         var audio = document.getElementById("sound-3");		
@@ -52,7 +63,20 @@ var styles = {
     }
 }
 GamePoint.PropTypes = {
-    point: PropTypes.number.isRequired
+    point: PropTypes.number.isRequired,
+    User: PropTypes.object.isRequired,
+    PlayerStats: PropTypes.object.isRequired,
+    setPlayerScore: PropTypes.func.isRequired
 }
 
-module.exports = GamePoint;
+// connect to Redux store
+var mapStateToProps = function(state){
+    // This component will have access User object of the redux state.
+    return {User: state.user, PlayerStats: state.game.playerStats.stats};
+};
+var mapDispatchToProps = function(dispatch){
+    return {
+        setPlayerScore: function(jsonData){ dispatch(gameActions(jsonData)); }
+    }
+};
+module.exports = ReactRedux.connect(mapStateToProps,mapDispatchToProps)(GamePoint);

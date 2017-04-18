@@ -3,7 +3,8 @@ var React = require('react'),
     GameHelper = require('../../utils/GameHelper'),
     GameLoadingGif =  require('../../components/Game/GameLoadingGif'),
     ReactRedux = require("react-redux"),
-    actions = require('../../redux/actions/authActions'),
+    authActions = require('../../redux/actions/authActions'),
+    gameActions = require('../../redux/actions/utilActions'),
     CategoryTile = require('../../components/Game/Dashboard/CategoryTile'),
     PlayerGameStats = require('../../components/Game/Dashboard/PlayerGameStats'),
     SpaceActionBtn = require('../../components/Game/SpaceActionBtn')
@@ -19,7 +20,9 @@ var GameHomeContainer = React.createClass({
         }
     },
     propTypes:{
-        User: PropTypes.object.isRequired
+        User: PropTypes.object.isRequired,
+        toggleDataFetching: PropTypes.func.isRequired,
+        setPlayerStats: PropTypes.func.isRequired
     },
     componentWillMount(){
         this.props.toggleDataFetching();
@@ -28,6 +31,9 @@ var GameHomeContainer = React.createClass({
             this.mapCategories(response.categories);
             this.props.toggleDataFetching();
             this.setState({playerStats: response.playerStats});
+            
+            //Store stats in redux store state 
+            this.props.setPlayerStats(response.playerStats);
         }.bind(this));
         document.addEventListener("keydown", this.commandListener);
     },
@@ -89,8 +95,8 @@ var GameHomeContainer = React.createClass({
         var UserData = this.props.User.information;
         if(this.state.playerStats != null) {
             var Statistics = this.state.playerStats,
-            levelProgress = Math.round((Statistics.stats.Player.points / Statistics.level.upper_limit) * 100);
-            console.log(Statistics.stats.Player.points, Statistics.level.upper_limit, levelProgress);
+                levelProgress = Math.round((Statistics.stats.Player.points - Statistics.level.lower_limit) / (Statistics.level.upper_limit - Statistics.level.lower_limit) * 100);
+            
         }
         return (
             this.props.fetchingData ? 
@@ -129,7 +135,8 @@ var mapStateToProps = function(state){
 };
 var mapDispatchToProps = function(dispatch){
     return {
-        toggleDataFetching: function() {dispatch(actions.toggleDataFetching())}
+        toggleDataFetching: function() {dispatch(authActions.toggleDataFetching())},
+        setPlayerStats: function(jsonData){ dispatch(gameActions.setPlayerStats(jsonData)); }
     }
 };
 module.exports = ReactRedux.connect(mapStateToProps,mapDispatchToProps)(GameHomeContainer);

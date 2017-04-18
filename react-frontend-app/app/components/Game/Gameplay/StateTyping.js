@@ -43,6 +43,7 @@ var StateTyping = React.createClass({
         if(e.keyCode == 32) {
             var currentText = this.state.inputText.trim();
             var displayWord = this.props.words[this.state.currentWordIndex];
+            console.log('CurrentText: ', currentText, ", Display Text ", displayWord, ", currentIdx ", this.state.currentWordIndex);
             if(currentText.toUpperCase() === displayWord.toUpperCase()) {
                 //Display Next Word
                 nextIndex = this.state.currentWordIndex + 1;
@@ -96,6 +97,11 @@ var StateTyping = React.createClass({
             speedometerDegree: updatedSpeed
         });
         if (lastCalculation) {
+            //Give points if player beats its previous score 
+            if(this.props.shouldPlayGamePoint && this.props.PlayerStats.current_wps < wordsPerMin) {
+                this.setState({showGamePoint: <GamePoint point={3}/>})
+            }
+
             setTimeout(function() {
                 //Get the bonus question 
                 var questionObj = BonusQuestionAlgorithm.selectRandomQuestion();
@@ -134,7 +140,7 @@ var StateTyping = React.createClass({
                     characterElements: elements
                 });
             }
-            this.setState({isEntityRevealed: true, currentWordIndex: currentWordIndex, showGamePoint: <GamePoint point={10}/>});
+            this.setState({isEntityRevealed: true, currentWordIndex: currentWordIndex});
             this.calculateCurrentSpeed(new Date().getTime(), true);
         }
     },
@@ -158,7 +164,7 @@ var StateTyping = React.createClass({
             }.bind(this), 100);
         }
         this.setState({
-            inputText: event.target.value
+            inputText: event.target.value.trim()
         });
         
     },
@@ -225,7 +231,8 @@ StateTyping.propTypes = {
     words: PropTypes.array.isRequired,
     entityToReveal: PropTypes.string.isRequired,
     shouldPlayGamePoint: PropTypes.bool.isRequired,
-    nextScreen: PropTypes.string.isRequired
+    nextScreen: PropTypes.string.isRequired,
+    PlayerStats: PropTypes.object
 };
 
 var styles = {

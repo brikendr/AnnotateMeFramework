@@ -157,7 +157,7 @@ var getNeighborEntities = function(entity, callBack) {
     });
 }
 
-var resolveEntity = function(entityID, candidateID) {
+exports.resolveEntity = function(entityID, candidateID) {
     models.EntityMention.update({
         is_resolved: true
     },

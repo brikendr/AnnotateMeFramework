@@ -13,13 +13,16 @@ var ChallengeFeedback = React.createClass({
         var soundId = "";
         switch (this.props.challengeStatus) {
             case 1: {
-                this.setState({animation: "animated bounce", borderColor: "border-green-jungle"}); soundId = "challenge_won";break;
+                this.setState({animation: "animated bounce", borderColor: "border-green-jungle"}); soundId = "challenge_won";
+                this.props.persistPoints(this.props.challengedPoints);break;
             }
             case 2: {
-                this.setState({animation: "animated shake", borderColor: "border-red-mint"}); soundId = "challenge_lost";break;
+                this.setState({animation: "animated shake", borderColor: "border-red-mint"}); soundId = "challenge_lost";
+                this.props.persistPoints(this.props.challengedPoints * -1);break;
             }
             case 3: {
-                this.setState({animation: "animated jello", borderColor: "border-grey-cascade"}); soundId = "challenge_draw";break;
+                this.setState({animation: "animated jello", borderColor: "border-grey-cascade"}); soundId = "challenge_draw";
+                this.props.persistPoints(Math.round(this.props.challengedPoints / 2));break;
             }
         }
         this.playAudio(soundId);
@@ -102,7 +105,8 @@ ChallengeFeedback.propTypes = {
     onGameStateChange: PropTypes.func.isRequired,
     challengee: PropTypes.string.isRequired,
     challengeStatus: PropTypes.number.isRequired,
-    challengedPoints: PropTypes.number.isRequired
+    challengedPoints: PropTypes.number.isRequired,
+    persistPoints: PropTypes.func.isRequired
 };
 
 module.exports = ChallengeFeedback;

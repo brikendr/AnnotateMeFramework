@@ -21,7 +21,7 @@ var LevelUp = React.createClass({
             this.setState({pointAnimation: "animated zoomOut"});
             
             this.destroyElement();
-        }.bind(this), 5000);
+        }.bind(this), 1000);
 
     },
     jqueryAnimate(){
@@ -51,7 +51,7 @@ var LevelUp = React.createClass({
     destroyElement() {
         setTimeout(function() {
             this.setState({shouldShow: false});
-        }.bind(this), 1000);
+        }.bind(this), 10000);
     },
     render(){
         var element = this.state.shouldShow ?
@@ -59,20 +59,20 @@ var LevelUp = React.createClass({
             <audio src={assetsDir+"/audio/Winning-sound-effect-piano.mp3"} id="sound-3"></audio>
             <div className="modal">
                 <div className="head">
-                    <h3 className="bold font-white">Level Up! (Level Name)</h3>
-                    </div>
-                <div className="content">
-                    
-                        <p>Congratulations! You’ve earned enough Points to reach a new level.</p>
+                    <h3 className="bold font-white">Level Up!</h3>
+                    <h4 className="font-white">({this.props.nextLevelName})</h4>
+                </div>
+                <div className="content">                    
+                        <p className="font-green-haze smallPargraph" >Congratulations! You’ve earned enough Points to reach a new level.</p>
                         <div id="initial-lvl" className="num-circle">
-                            <span>1</span>
+                            <span>{this.props.currentLevelNr}</span>
                         </div>
                         <div className="line">
                             <div className="progress"></div>
                             <span className="cur-xp">1500</span><span className="xp"> CC</span>
                         </div>
                         <div className="num-circle target-lvl">
-                            10
+                            {this.props.nextLevelNR}
                         </div>
                         <div className="clear"></div>
                 </div>
@@ -96,12 +96,10 @@ var styles = {
         transform: 'translate(-50%, -50%)'
     }
 }
-/*LevelUp.PropTypes = {
-    point: PropTypes.number.isRequired,
-    currentLevel: PropTypes.string.isRequired,
-    nextLevel: PropTypes.string.isRequired,
-    startValue: PropTypes.number.isRequired,
-    finishValue: PropTypes.number.isRequired
-}*/
+LevelUp.PropTypes = {
+    currentLevelNr: PropTypes.string.isRequired,
+    nextLevelNR: PropTypes.string.isRequired,
+    nextLevelName: PropTypes.number.isRequired
+}
 
 module.exports = LevelUp;

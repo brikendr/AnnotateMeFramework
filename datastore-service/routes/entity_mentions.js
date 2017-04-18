@@ -46,7 +46,7 @@ router.post('/', function(req, res, next){
     }).then(function(result){
         //Return Response
         res.json({
-            "status": 201,
+            "status": 200,
             "resource": result,
             "resourceLink": "/entities/"+result.id
         });
@@ -227,7 +227,7 @@ router.post('/:id/collocations', function(req, res, next){
             }).then(function(result){
                 //Return Response
                 res.json({
-                    "status": 201,
+                    "status": 200,
                     "resource": result,
                     "resourceLink": "/entities/"+result.EntityMentionId+"/collocations"
                 });
@@ -336,7 +336,7 @@ router.post('/:id/candidates', function(req, res, next){
             }).then(function(result){
                 //Return Response
                 res.json({
-                    "status": 201,
+                    "status": 200,
                     "resource": result,
                     "resourceLink": "/entities/"+result.EntityMentionId+"/candidates"
                 });

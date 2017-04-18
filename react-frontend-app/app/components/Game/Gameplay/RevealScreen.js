@@ -2,6 +2,7 @@ var React = require('react');
 var PropTypes = React.PropTypes,
     assets = require('../../../utils/constatns').assets,
     calculateWPM = require('../../../utils/globalFunctions').caluclateWPM,
+    GameHelper = require('../../../utils/GameHelper'),
     GameCandidate = require('./GameCandidate'),
     GameClue = require('../GameClues'),
     BetModal = require('./BetModal'),
@@ -24,8 +25,9 @@ var RevealScreen = React.createClass({
     },
     componentDidMount() {
         var i = 1;
+        console.log(this.props.candidates);
         const mappedCandidates = this.props.candidates.map(candidate => 
-            <GameCandidate key={i} name={candidate} number={i++}/>                  
+            <GameCandidate key={candidate.id} name={candidate.candidate_name} number={i++}/>                  
         );
 
         var i = 1;
@@ -39,9 +41,6 @@ var RevealScreen = React.createClass({
         });
         document.body.addEventListener("keydown", this.handleCandidateSelection);
         this.loadDependencies();
-
-        //REMOVE 
-        //this.setState({selectedACandidate: true})
     },
     loadDependencies() {
         require('../../../styles/speedometer.css');
@@ -51,7 +50,7 @@ var RevealScreen = React.createClass({
     handleCandidateSelection(e){
         var val = this.state.bettingPoints;
         if([49, 50, 51, 52].indexOf(e.keyCode) != -1) {
-            this.setState({selectedCandidate: e.keyCode - 49,animation: "bg-green-jungle bg-font-green-jungle animated bounce", showGamePoint: <GamePoint point={10}/>});
+            this.setState({selectedCandidate: e.keyCode - 49,animation: "bg-green-jungle bg-font-green-jungle animated bounce", showGamePoint: <GamePoint point={5}/>});
             this.playAudio("check-right");
             setTimeout(function () {
                 this.setState({animation: "", selectedACandidate: true});
@@ -65,7 +64,7 @@ var RevealScreen = React.createClass({
             this.toggleModal();
             this.setState({playerIsBetting: true});
         }
-        else if((e.ctrlKey && e.keyCode == 32) && !this.state.playerIsBetting) {
+        else if((e.ctrlKey && e.keyCode == 32) && !this.state.playerIsBetting && this.state.selectedACandidate) {
             this.unbindListeners();
         }
         else if (e.keyCode == 37 && this.state.playerIsBetting) {
@@ -82,18 +81,32 @@ var RevealScreen = React.createClass({
         } 
         else if((e.ctrlKey && e.keyCode == 32) && this.state.playerIsBetting) {
             this.toggleModal();
-            this.registerBettingPoints();
+            //this.registerBettingPoints();
             this.setState({playerIsBetting: false, hasPlayerBet: true});
         }
         
     },
     unbindListeners() {
         document.body.removeEventListener("keydown", this.handleCandidateSelection);
-        this.props.onGameStateChange("POINTS_CHALLENGE");
+        //Persist Game data and betting (if player has bet)
+        var gameData = {
+            'wps': this.props.wpm,
+            'typing_paragraph': this.props.paragraph.join(),
+            'betscore': this.state.hasPlayerBet ? (this.state.bettingPoints / 10):0,
+            'EntityMentionId': 11,
+            'CandidateId': this.props.candidates[this.state.selectedCandidate].id,
+            'PlayerId': this.props.PlayerId
+        }
+        GameHelper.persistGameRound(gameData)
+         .then(function(response){
+            console.log('GAME REGISTERED')
+            console.log(response);
+            this.props.onGameStateChange("POINTS_CHALLENGE");
+         }.bind(this));
+        
     },
     registerBettingPoints() {
-        //TODO: LOGIC, register betting points
-        console.log('REGISTERING BETTING POINTS');
+        
     },
     toggleModal() {
         var modalWrapper = document.querySelector('.modal-wrapper');
@@ -113,7 +126,7 @@ var RevealScreen = React.createClass({
             <div className="col-md-12">
                 {!this.state.selectedACandidate ?
                 <div className={"row justify-content-center"}>
-                    <div className="col-10 text-center">
+                    <div className="col-10 text-center stickyNotesDiv">
                         
                             <ul>
                                 {this.state.mappedClues}
@@ -131,11 +144,15 @@ var RevealScreen = React.createClass({
                         </div>
                     </div>
                 </div>
-                <div className={"row justify-content-center " + (this.state.selectedACandidate ? "animated flipInX":"hidden")}>
+                {this.state.selectedACandidate ?
+                <div className={"row justify-content-center animated flipInX"}>
                     <div className="col-4 text-center">
-                        AWESOME! You selected <strong>{this.props.candidates[this.state.selectedCandidate]}</strong>
+                        AWESOME! You selected <strong>{this.props.candidates[this.state.selectedCandidate].candidate_name}</strong>
                     </div>                    
                 </div>
+                : ""
+                }
+                
                 <div className={"row justify-content-center "+ (this.state.selectedACandidate ? "hidden":"")}  >
                     <div className="col-8 text-center">
                         <div className={"row "+ this.state.animation}>
@@ -174,7 +191,10 @@ RevealScreen.propTypes = {
     onGameStateChange: PropTypes.func.isRequired,
     charElements: PropTypes.array.isRequired,
     candidates: PropTypes.array.isRequired,
-    contextClues: PropTypes.array.isRequired
+    contextClues: PropTypes.array.isRequired,
+    PlayerId: PropTypes.number.isRequired,
+    paragraph: PropTypes.array.isRequired,
+    wpm: PropTypes.number.isRequired
 };
 
 var styles = {

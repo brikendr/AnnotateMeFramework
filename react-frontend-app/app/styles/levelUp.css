@@ -72,3 +72,7 @@
           transform: translateX(-850%) scale(2);
   margin-top: 20px;
 }
+
+.smallPargraph {
+  font-size: 1.2em !important;
+}

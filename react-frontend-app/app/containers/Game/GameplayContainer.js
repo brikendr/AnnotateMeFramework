@@ -4,7 +4,7 @@ var React = require('react'),
     GameHelper = require('../../utils/GameHelper'),
     GameLoadingGif =  require('../../components/Game/GameLoadingGif'),
     ReactRedux = require("react-redux"),
-    actions = require('../../redux/actions/authActions'),
+    gameActions = require('../../redux/actions/utilActions'),
     SpaceActionBtn = require('../../components/Game/SpaceActionBtn'),
     StateTyping = require('../../components/Game/Gameplay/StateTyping'),
     BonusQuestion = require('../../components/Game/Gameplay/BonusQuestion'),
@@ -20,20 +20,23 @@ var GameplayContainer = React.createClass({
         return {
             currentGameState: "TYPING",
             possibleGameStates: ["TYPING", "BONUS_QUESTION", "RESOLVING_ENTITY", "BETTING", "POINTS_CHALLENGE", "COMPLETED"],
+            screenToShow: null,
             wpm: 0,
             charElements: [],
-            bonusQuestion: {}
+            paragraph: ["The","quick", "brown", "fox", "dog" , "jumps", "over", "fox" ,"lazy"],
+            bonusQuestion: {},
+            newLevel: null
         }
     },
     propTypes:{
-        fetchingData: PropTypes.bool.isRequired,
-        toggleDataFetching: PropTypes.func.isRequired
+        PlayerStats: PropTypes.object.isRequired,
+        setPlayerWPM: PropTypes.func.isRequired,
+        Level: PropTypes.object.isRequired,
+        setPlayerLevel: PropTypes.func.isRequired
     },
     componentDidMount(){
-        this.props.toggleDataFetching();
-        this.props.toggleDataFetching();
-        
         //document.addEventListener("keydown", this.commandListener);
+        this.changeGameState("TYPING");
     },
     commandListener(e) {
         switch(e.keyCode) {
@@ -48,40 +51,17 @@ var GameplayContainer = React.createClass({
         this.context.router.push(path);
     },
     changeGameState(newState) {
-        if(this.state.possibleGameStates.indexOf(newState) != -1) {
-            this.setState({
-                currentGameState: newState
-            });
-        }
-    },
-    handleStats(stats, charElementsStyled, bonusQuestionObj) {
-        //TODO: save stats to db 
-        this.setState({
-            wpm: stats.wpm,
-            charElements: charElementsStyled,
-            bonusQuestion: bonusQuestionObj
-        });
-    },
-    challengePlayers(playersToChallenge) {
-        //TODO: register challenges
-        console.log("REGISTERING CHALLENGES");
-    },
-    playAudio(soundID) {
-        var audio = document.getElementById(soundID);		
-        audio.play();
-    },
-    render() {
         var screenToShow = null;
-        
-        switch(this.state.currentGameState) {
+        switch(newState) {
             case "TYPING": {
                 screenToShow= <StateTyping 
                     onGameStateChange={this.changeGameState} 
                     setTypingStats={this.handleStats} 
-                    words={["The","quick", "brown", "fox", "dog" , "jumps", "over", "fox" ,"lazy", "dog", "when", "fox", "dog", "MTV", "ax", "quiz", "fox", "dog", "prog", "Junk", "fox", "dog", "MTV", "quiz", "graced", "by", "fox"]}
+                    words={this.state.paragraph}
                     entityToReveal="JOHNNY"
                     shouldPlayGamePoint={true}
-                    nextScreen="BONUS_QUESTION" />
+                    nextScreen="BONUS_QUESTION"
+                    PlayerStats={this.props.PlayerStats} />
                     break;
             }
             case "BONUS_QUESTION": {
@@ -95,8 +75,11 @@ var GameplayContainer = React.createClass({
                 screenToShow = <RevealScreen 
                     onGameStateChange={this.changeGameState} 
                     charElements={this.state.charElements}
-                    candidates={["Johhny Chase", "Johnny Depp", "Johnny CORP", "Johnny Gambini"]}
+                    candidates={[{"id": 43,"candidate_name":"Johhny Chase"},{"id": 44,"candidate_name":"Johnny Depp"},{"id": 45,"candidate_name":"Johnny CORP"},{"id": 50,"candidate_name":"Johnny Gambini"}]}
                     contextClues={["Pirates of Caribbean", "Tourist", "Jack Sparrow", "Leading Role", "Scissorhands", "unique style"]}
+                    PlayerId={this.props.PlayerStats.Player.id}
+                    paragraph={this.state.paragraph}
+                    wpm={this.state.wpm}
                          />
                     break;
             }
@@ -108,23 +91,60 @@ var GameplayContainer = React.createClass({
                     />;
                 break;
             } case "COMPLETED": {
-                //TODO: Anything to 
-                this.playAudio('finishRound');
-                setTimeout(function(){
-                    window.location.href = "/";
-                }, 3000);
-                
+                console.log(this.props.Level, this.props.PlayerStats.Player);
+                GameHelper.checkPlayerHasLeveledUp(this.props.Level, this.props.PlayerStats.Player)
+                 .then(function(response){
+                     console.log(response);
+                     if(response.resource.updated) {
+                        //Player has leveld up 
+                        if(response.resource.status == "upgrade") {
+                            this.setState({currentGameState: "",newLevel: <LevelUp currentLevelNr={this.props.Level.id} nextLevelNR={response.resource.newLevel.id} nextLevelName={response.resource.newLevel.name} />});
+                        }
+                        this.props.setPlayerLevel(response.resource.newLevel);
+                        setTimeout(function(){
+                            window.location.href = "/";
+                        }, 10200);
+                     } else {
+                        this.playAudio('finishRound');
+                        setTimeout(function(){
+                            window.location.href = "/";
+                        }, 3000);
+                     }
+                 }.bind(this));
+                 break;
             }
         }
+        this.setState({screenToShow: screenToShow});
+    },
+    handleStats(stats, charElementsStyled, bonusQuestionObj) { 
+        this.setState({
+            wpm: stats.wpm,
+            charElements: charElementsStyled,
+            bonusQuestion: bonusQuestionObj
+        });
+        
+        //Update WPM in DB
+        GameHelper.updatePlayerWPM(stats.wpm, this.props.PlayerStats.Player.id)
+            .then(function(updated){
+                this.props.setPlayerWPM(stats.wpm);
+            }.bind(this));
+    },
+    challengePlayers(playersToChallenge) {
+        //TODO: register challenges
+        console.log("REGISTERING CHALLENGES");
+    },
+    playAudio(soundID) {
+        var audio = document.getElementById(soundID);		
+        audio.play();
+    },
+    render() {
         return (
-            this.props.fetchingData ? 
-            <GameLoadingGif />
-            :
             <div className="col-md-12">
                 <div className="row justify-content-center">
-                    {screenToShow}
+                    {this.state.screenToShow}
                 </div>
                 <audio src={assetsDir+"/audio/Funky-guitar-logo.mp3"} id="finishRound"></audio>
+                {this.state.newLevel}
             </div>
         )
     }
@@ -133,11 +153,12 @@ var GameplayContainer = React.createClass({
 // connect to Redux store
 var mapStateToProps = function(state){
     // This component will have access to `appstate.heroes` through `this.props.heroes`
-    return {fetchingData: state.game.fetchingData};
+    return {PlayerStats: state.game.playerStats.stats, Level: state.game.playerStats.level};
 };
 var mapDispatchToProps = function(dispatch){
     return {
-        toggleDataFetching: function() {dispatch(actions.toggleDataFetching())}
+        setPlayerWPM: function(jsonData){ dispatch(gameActions.setPlayerWPM(jsonData));},
+        setPlayerLevel: function(jsonData){ dispatch(gameActions.setPlayerLevel(jsonData));}
     }
 };
 module.exports = ReactRedux.connect(mapStateToProps,mapDispatchToProps)(GameplayContainer);

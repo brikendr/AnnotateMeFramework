@@ -4,10 +4,11 @@ var React = require('react'),
     GameHelper = require('../../utils/GameHelper'),
     GameLoadingGif =  require('../../components/Game/GameLoadingGif'),
     ReactRedux = require("react-redux"),
-    actions = require('../../redux/actions/authActions'),
+    gameActions = require('../../redux/actions/utilActions'),
     StateTyping = require('../../components/Game/Gameplay/StateTyping'),
     ChallengeIntro = require('../../components/Game/Extras/ChallengeIntro'),
-    ChallengeFeedback = require('../../components/Game/Extras/ChallengeFeedback');
+    ChallengeFeedback = require('../../components/Game/Extras/ChallengeFeedback'),
+    LevelUp = require('../../components/Game/Extras/LevelUp');
 
 var ChallengeGame = React.createClass({
     contextTypes: {
@@ -17,44 +18,31 @@ var ChallengeGame = React.createClass({
         return {
             currentGameState: "INTRO",
             possibleGameStates: ["INTRO", "PLAYING", "FEEDBACK", "FINISH_CHALLENGE"],
+            screenToShow: null,
             challengedWPM: 45,
             challengedPoints: 5,
-            challengeStatus: 0
+            challengeStatus: 0,
+            newLevel: null
         }
     },
     propTypes:{
-        fetchingData: PropTypes.bool.isRequired,
-        toggleDataFetching: PropTypes.func.isRequired
+        User: PropTypes.object.isRequired,
+        PlayerStats: PropTypes.object.isRequired,
+        Level: PropTypes.object.isRequired,
+        setPlayerLevel: PropTypes.func.isRequired,
+        setPlayerScore: PropTypes.func.isRequired
     },
     componentDidMount(){
-        this.props.toggleDataFetching();
-        this.props.toggleDataFetching();
-        
         //document.addEventListener("keydown", this.commandListener);
+        this.changeGameState("INTRO");
     },
     redirectGame(path) {
         //document.removeEventListener("keydown", this.commandListener);
         this.context.router.push(path);
     },
     changeGameState(newState) {
-        if(this.state.possibleGameStates.indexOf(newState) != -1) {
-            this.setState({
-                currentGameState: newState
-            });
-        }
-    },
-    handleStats(stats, charElementsStyled) {
-        //TODO: save stats to db 
-        var newStatus = stats.wpm == this.state.challengedWPM ? 3 : stats.wpm > this.state.challengedWPM ? 1:2;
-        console.log('NEW STATS ', newStatus);
-        this.setState({
-            challengeStatus: newStatus
-        });
-    },
-    render() {
         var screenToShow = null;
-        
-        switch(this.state.currentGameState) {
+        switch(newState) {
             case "INTRO": {
                 screenToShow= <ChallengeIntro 
                     onGameStateChange={this.changeGameState}
@@ -71,7 +59,8 @@ var ChallengeGame = React.createClass({
                     words={["test", "hello", "second"]}
                     entityToReveal="JOHNNY"
                     shouldPlayGamePoint={false}
-                    nextScreen="FEEDBACK" />
+                    nextScreen="FEEDBACK"
+                    PlayerStats={this.props.PlayerStats} />
                     break;
             }
             case "FEEDBACK": {
@@ -79,23 +68,54 @@ var ChallengeGame = React.createClass({
                     onGameStateChange={this.changeGameState}
                     challengee={this.props.User.information.username}
                     challengeStatus={this.state.challengeStatus}
-                    challengedPoints={this.state.challengedPoints} />
+                    challengedPoints={this.state.challengedPoints}
+                    persistPoints={this.persistPoints} />
                     break;
             }
             case "FINISH_CHALLENGE": {
-                //TODO: Anything to persist
-                window.location.href = "/";
+                GameHelper.checkPlayerHasLeveledUp(this.props.Level, this.props.PlayerStats.Player)
+                 .then(function(response){
+                     if(response.resource.updated) {
+                        //Player has leveld up 
+                        var timoutTime = 1000;
+                        if(response.resource.status == "upgrade") {
+                            timoutTime = 10200;
+                            this.setState({screenToShow: null,newLevel: <LevelUp currentLevelNr={this.props.Level.id} nextLevelNR={response.resource.newLevel.id} nextLevelName={response.resource.newLevel.name} />});
+                        }
+                        this.props.setPlayerLevel(response.resource.newLevel);
+                        setTimeout(function(){
+                            window.location.href = "/";
+                        }, timoutTime);
+                     } else {
+                        window.location.href = "/";
+                     }
+                 }.bind(this));
             }
         }
+        this.setState({screenToShow: screenToShow});
+    },
+    handleStats(stats, charElementsStyled) {
+        //TODO: save stats to db 
+        var newStatus = stats.wpm == this.state.challengedWPM ? 3 : stats.wpm > this.state.challengedWPM ? 1:2;
+        
+        this.setState({
+            challengeStatus: newStatus
+        });
+    },
+    persistPoints(points) {
+        console.log("PERSISTING ", points);
+        this.props.setPlayerScore(points);
+        //Update Score in db 
+        var PlayerInfo = this.props.PlayerStats.Player;
+        GameHelper.registerPoint(PlayerInfo.points, PlayerInfo.id);
+    },
+    render() {
         return (
-            this.props.fetchingData ? 
-            <GameLoadingGif />
-            :
             <div className="col-md-12">
                 <div className="row justify-content-center">
-                    {screenToShow}
+                    {this.state.screenToShow}
                 </div>
-                <audio src={assetsDir+"/audio/Funky-guitar-logo.mp3"} id="finishRound"></audio>
+                {this.state.newLevel}
             </div>
         )
     }
@@ -104,11 +124,13 @@ var ChallengeGame = React.createClass({
 // connect to Redux store
 var mapStateToProps = function(state){
     // This component will have access to `appstate.heroes` through `this.props.heroes`
-    return {User: state.user, fetchingData: state.game.fetchingData};
+    return {User: state.user, PlayerStats: state.game.playerStats.stats, Level: state.game.playerStats.level};
 };
 var mapDispatchToProps = function(dispatch){
     return {
-        toggleDataFetching: function() {dispatch(actions.toggleDataFetching())}
+        setPlayerWPM: function(jsonData){ dispatch(gameActions.setPlayerWPM(jsonData));},
+        setPlayerLevel: function(jsonData){ dispatch(gameActions.setPlayerLevel(jsonData));},
+        setPlayerScore: function(jsonData){ dispatch(gameActions.setPlayerScore(jsonData)); }
     }
 };
 module.exports = ReactRedux.connect(mapStateToProps,mapDispatchToProps)(ChallengeGame);
