@@ -43,7 +43,7 @@ var StateTyping = React.createClass({
         if(e.keyCode == 32) {
             var currentText = this.state.inputText.trim();
             var displayWord = this.props.words[this.state.currentWordIndex];
-            console.log('CurrentText: ', currentText, ", Display Text ", displayWord, ", currentIdx ", this.state.currentWordIndex);
+            
             if(currentText.toUpperCase() === displayWord.toUpperCase()) {
                 //Display Next Word
                 nextIndex = this.state.currentWordIndex + 1;
@@ -101,7 +101,7 @@ var StateTyping = React.createClass({
             if(this.props.shouldPlayGamePoint && this.props.PlayerStats.current_wps < wordsPerMin) {
                 this.setState({showGamePoint: <GamePoint point={3}/>})
             }
-
+            
             setTimeout(function() {
                 //Get the bonus question 
                 var questionObj = BonusQuestionAlgorithm.selectRandomQuestion();
@@ -113,13 +113,13 @@ var StateTyping = React.createClass({
         }
     },
     handleCharacterReveal(){
-        var currentWordIndex = this.state.currentWordIndex + 1;
-        var totalWords = this.props.words.length;
-        var totalChars = this.state.characterElements.length; 
-        var wordsPerCharacter = Math.round(totalWords / totalChars);
-        var accumulatedRevCount = this.state.accumulatedRevealCount;
-        var nextCharToReveal = this.state.nextCharToReveal;
-        var elements = this.state.characterElements;
+        var currentWordIndex = this.state.currentWordIndex + 1,
+            totalWords = this.props.words.length,
+            totalChars = this.state.characterElements.length, 
+            wordsPerCharacter = Math.round(totalWords / totalChars),
+            accumulatedRevCount = this.state.accumulatedRevealCount,
+            nextCharToReveal = this.state.nextCharToReveal,
+            elements = this.state.characterElements;
 
         if(currentWordIndex == (accumulatedRevCount + wordsPerCharacter)) {
             //reveal character in order 
@@ -132,13 +132,16 @@ var StateTyping = React.createClass({
             });
         }
         
-        if(currentWordIndex >= totalWords && nextCharToReveal <= elements.length - 1) {
-            for(var i= nextCharToReveal; i < elements.length; i++) {
-                elements[i] = <button key={i} type="button" className="btn btn-circle green btn-outline animated flipInX ">{this.props.entityToReveal.charAt(i)}</button>;
-            
-                this.setState({
-                    characterElements: elements
-                });
+        if(currentWordIndex >= totalWords) {
+            if(nextCharToReveal <= elements.length - 1){
+                //Reveal what is left
+                for(var i= nextCharToReveal; i < elements.length; i++) {
+                    elements[i] = <button key={i} type="button" className="btn btn-circle green btn-outline animated flipInX ">{this.props.entityToReveal.charAt(i)}</button>;
+                
+                    this.setState({
+                        characterElements: elements
+                    });
+                }
             }
             this.setState({isEntityRevealed: true, currentWordIndex: currentWordIndex});
             this.calculateCurrentSpeed(new Date().getTime(), true);
@@ -181,7 +184,7 @@ var StateTyping = React.createClass({
             <div className="col-md-10">
                 <div className={"row justify-content-center marginTop5"}  >
                     <div className="col-5 text-center">
-                        <div className="clearfix">
+                        <div className="clearfix characterRevealMargin">
                             <p>
                                 {this.state.characterElements}
                             </p>

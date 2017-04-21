@@ -3,7 +3,6 @@ var React = require('react'),
     PropTypes = React.PropTypes;
 
 function PlayerGameStats(props) {
-    console.log(props.player);
     return (
         <div className="box">
             <div className="box__header">
@@ -12,7 +11,7 @@ function PlayerGameStats(props) {
             <div className="box__body">
                 <div className="stats stats--main">
                     <div className="stats__amount">{props.wps}</div>
-                    <div className="stats__caption">WPS (words per minute)</div>
+                    <div className="stats__caption">WPM (words per minute)</div>
                 </div>
                 <div className="stats stats--main">
                     <div className="stats__amount">{props.points}</div>

@@ -77,7 +77,7 @@ var BonusQuestion = React.createClass({
                             {this.state.mappedCandidates}
                         </div>
                         <div className="row justify-content-center">
-                            <h5>Press the number to select candidate!</h5>
+                            <h4>Press a number [1-{this.state.mappedCandidates.length}] to select candidate!</h4>
                         </div>
                     </div>
                 </div>

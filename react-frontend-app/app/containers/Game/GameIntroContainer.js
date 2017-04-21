@@ -21,7 +21,7 @@ var GameIntroContainer = React.createClass({
             username: "",
             password: "",
             isAuthenticating: false,
-            infoMessage: <span className="font-blue-soft font-sm sbold">Type Secret Combo!</span>
+            infoMessage: <span className="font-blue-soft font-sm sbold">Want to play! Type the secret combinations!</span>
         }
     },
     propTypes:{
@@ -123,7 +123,7 @@ var GameIntroContainer = React.createClass({
                     </div>
                     <div className="row justify-content-center margin-top-0 animated fadeInUp" >
                         <div className="col-4 text-center">
-                            <p><span className="badge badge-info badge-roundless animated bounce infinite"> New ? </span> <strong>Press <span className="font-red-thunderbird sbold">Ctrl + Space</span></strong></p>
+                            <p><span className="badge badge-info badge-roundless animated bounce infinite"> New ? </span> <strong>Wanna know the game secret? <br/>Press <span className="font-red-thunderbird sbold">Ctrl + Space</span> to find out!</strong></p>
                         </div>
                     </div>
                 </div>

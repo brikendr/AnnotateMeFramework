@@ -1,16 +1,62 @@
 var React = require('react'),
     PropTypes = React.PropTypes,
-    Link = require('react-router').Link;
+    ReactRedux = require("react-redux"),
+    GameHelper = require('../../../utils/GameHelper'),
+    Link = require('react-router').Link,
+    toastr = require('../../../assets/js/plugins/bootstrap-toastr/toastr.min.js');
 
 var ChallengeNotification = React.createClass({
     getInitialState: function() {
         return {
             menuShowing: false,
+            mappedChallenges: [],
             expanded: ""
         }
     },
+    propTypes:{
+        User: PropTypes.object.isRequired
+    },
     componentDidMount() {
         require('../../../styles/challengeNotificationStyle.css');
+        
+        //fetch any challenges
+        GameHelper.fetchPlayerChallenges(this.props.User.information.id)
+         .then(function(response){
+            this.mapChallenges(response.resource);
+         }.bind(this));
+    },
+    mapChallenges(challenges) {
+        var i = 1;
+        const mappedChallenges = challenges.map(challenge => 
+            <li key={challenge.id} className="notification-group">
+                <Link to={'/challenge/'+challenge.id}>
+                    <div className="notification-tab">
+                        {challenge.challenger.username} challenged you [To Beat: {challenge.p1_wps} wpm]
+                    </div>
+                </Link>
+                
+            </li>              
+        );
+        this.setState({mappedChallenges: mappedChallenges});
+        
+        if(challenges.length > 0) {
+            setTimeout(function(){
+                toastr.options = {
+                    "closeButton": false,
+                    "debug": false,
+                    "positionClass": "toast-bottom-right",
+                    "showDuration": "1000",
+                    "hideDuration": "1000",
+                    "timeOut": "5000",
+                    "extendedTimeOut": "1000",
+                    "showEasing": "swing",
+                    "hideEasing": "linear",
+                    "showMethod": "fadeIn",
+                    "hideMethod": "fadeOut"
+                }
+                toastr["info"]("YOU have "+challenges.length+" new "+(challenges.length > 1 ? "challenges":"challenge"), "WELCOME BACK!");
+            }.bind(this), 1000);
+        }
     },
     handleMouseEnter(e) {
         var menuShowing = this.state.menuShowing;
@@ -32,27 +78,10 @@ var ChallengeNotification = React.createClass({
                         <div className={"dropdown-container " + this.state.expanded} onMouseEnter={this.handleMouseEnter} onMouseLeave={this.handleMouseLeave}>
                             <a href="#" data-dropdown="notificationMenu" className="menu-link has-notifications circle bttn">
                                 <i className="fa fa-bell"></i>
-                                <span className="notification-label notification-label-blue">3</span>
+                                <span className="notification-label notification-label-blue">{this.state.mappedChallenges.length}</span>
                             </a>
                             <ul className="dropdown moveRightFromPage" name="notificationMenu" onMouseEnter={this.handleMouseEnter} onMouseLeave={this.handleMouseLeave}>
-                                <li className="notification-group">
-                                    <Link to='/challenge/1'>
-                                        <div className="notification-tab">
-                                            Ardit challenged you in Arts [43 wpm]
-                                        </div>
-                                    </Link>
-                                    
-                                </li>
-                                <li className="notification-group">
-                                    <div className="notification-tab">
-                                        Ardit challenged you in Arts [43 wpm]
-                                    </div>
-                                </li>
-                                <li className="notification-group">
-                                    <div className="notification-tab">
-                                        Ardit challenged you in Arts [43 wpm] sadsadasdsaasd
-                                    </div>
-                                </li>
+                                {this.state.mappedChallenges}
                             </ul>
                         </div>
                     </li>
@@ -62,4 +91,9 @@ var ChallengeNotification = React.createClass({
     }
 });
 
-module.exports = ChallengeNotification;
+// connect to Redux store
+var mapStateToProps = function(state){
+    // This component will have access to `appstate.heroes` through `this.props.heroes`
+    return {User: state.user};
+};
+module.exports = ReactRedux.connect(mapStateToProps)(ChallengeNotification);

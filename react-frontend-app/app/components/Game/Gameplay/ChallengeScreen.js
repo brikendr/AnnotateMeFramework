@@ -1,6 +1,7 @@
 var React = require('react'),
     PropTypes = React.PropTypes,
     assets = require('../../../utils/constatns').assets,
+    GameHelper = require('../../../utils/GameHelper'),
     Challengers = require('./Challengers'),
     SpaceBtn = require('../../../components/Game/SpaceActionBtn');
 
@@ -16,22 +17,33 @@ var ChallengeScreen = React.createClass({
     componentDidMount() {
         document.body.addEventListener("keydown", this.handleCandidateSelection);
         this.loadDependencies();
+        //fetch possible challengers 
+        GameHelper.fetchPossibleChallengers(this.props.Player.id, this.props.wpm)
+            .then(function(possibleChallengers) {
+                this.mapChallengers(possibleChallengers.resource);
+            }.bind(this));
     },
     loadDependencies() {
         require('../../../styles/playerStats.css');
         require('../../../styles/slider.css');
     },
-    toggleChallengerFromList(challengerNr) {
+    mapChallengers(challengers) {
+        var i = 1;
+        const mappedChallengers = challengers.map(challenger => 
+            <Challengers key={challenger.id} name={challenger.Player.username} wpm={challenger.current_wps} number={i++} challengerId={challenger.Player.id} toggleChallengerFromList={this.toggleChallengerFromList} />               
+        );
+        this.setState({mappedChallengers: mappedChallengers});
+    },
+    toggleChallengerFromList(challengerId, wpm) {
         var selectedChallengers = this.state.selectedChallengers;
-            idx = selectedChallengers.indexOf(challengerNr);
-        if(selectedChallengers[challengerNr] != null) {
+            idx = selectedChallengers.map(function(e) { return e.challengerId; }).indexOf(challengerId);
+        if(idx > -1) {
             selectedChallengers.splice(idx, 1);
 
         } else {
-            selectedChallengers[challengerNr] = challengerNr;
+            selectedChallengers.push({'challengerId': challengerId, 'wpm': wpm});
         }
         this.setState({selectedChallengers: selectedChallengers});
-        console.log(selectedChallengers);
     },
     handleCandidateSelection(e){
         var val = this.state.challengedPoints;
@@ -51,7 +63,7 @@ var ChallengeScreen = React.createClass({
         } 
         else if (e.ctrlKey && e.keyCode == 32) {
             //TODO save Challenge and go to home page
-            this.props.challengePlayers(this.state.selectedChallengers);
+            this.props.challengePlayers(this.state.selectedChallengers, (this.state.challengedPoints / 10));
             this.unbindListeners();
         }
     },
@@ -79,17 +91,12 @@ var ChallengeScreen = React.createClass({
                                     <div className="box__body">
 
                                         <div className="stats stats--main font-green-haze">
-                                            <div className="stats__caption">Challenging Speed</div>
+                                            <div className="stats__caption">(Your) Challenging Speed</div>
                                             <div className="stats__amount">{this.props.wpm} <small>wpm</small></div>
                                         </div>
 
                                         <div className="stats stats--main font-green-haze">
-                                            <div className="stats__caption">Game Category</div>
-                                            <div className="stats__amount">Arts</div>
-                                        </div>
-
-                                        <div className="stats stats--main font-green-haze">
-                                            <div className="stats__caption">Accumulated Points</div>
+                                            <div className="stats__caption">How many points?</div>
                                             <div className="stats__amount">
                                                 <audio src="https://s3.amazonaws.com/freecodecamp/simonSound4.mp3" id="sound-3"></audio>
                                                 <form>
@@ -97,7 +104,7 @@ var ChallengeScreen = React.createClass({
                                                     <h5 className="bold uppercase">{this.state.challengedPoints / 10 + (this.state.challengedPoints > 10 ? " Points":" Point")} </h5>
                                                 </form>
                                             </div>
-                                            <h5>Use Left - Right arrow to change value</h5>
+                                            <h4 className="font-dark">Use Left - Right arrow to change value</h4>
                                         </div>
 
                                         <div className="stats stats--main font-green-haze">
@@ -107,28 +114,10 @@ var ChallengeScreen = React.createClass({
                                                     <div className="col-10 text-center">
                                                         <div className="clearfix">
                                                             <div className="row justify-content-center">
-                                                                <Challengers   name="Brikend Rama"
-                                                                    wpm={34}
-                                                                    number={1} 
-                                                                    toggleChallengerFromList={this.toggleChallengerFromList}
-                                                                    />
-                                                                <Challengers   name="Ardit Dika"
-                                                                    wpm={28}
-                                                                    number={2}
-                                                                    toggleChallengerFromList={this.toggleChallengerFromList}
-                                                                    />
-                                                                <Challengers   name="Bjorn Hermansen"
-                                                                    wpm={38}
-                                                                    number={3} 
-                                                                    toggleChallengerFromList={this.toggleChallengerFromList}
-                                                                    />
-                                                                <Challengers   name="Sondre Trydal"
-                                                                    wpm={57}
-                                                                    number={4}
-                                                                    toggleChallengerFromList={this.toggleChallengerFromList} 
-                                                                    />
+                                                                {this.state.mappedChallengers}
                                                             </div>
                                                         </div>
+                                                        <h4 className="font-dark">Use numbers to select challenger</h4>
                                                     </div>
                                                 </div>
                                             </div>
@@ -149,7 +138,8 @@ var ChallengeScreen = React.createClass({
 ChallengeScreen.propTypes = {
     onGameStateChange: PropTypes.func.isRequired,
     wpm: PropTypes.number.isRequired,
-    challengePlayers: PropTypes.func.isRequired
+    challengePlayers: PropTypes.func.isRequired,
+    Player: PropTypes.object.isRequired
 };
 var styles = {
     portletTitle: {

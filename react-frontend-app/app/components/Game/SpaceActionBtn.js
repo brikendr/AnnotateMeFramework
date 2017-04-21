@@ -8,8 +8,11 @@ function SpaceActionBtn(props) {
             <div className="form-actions">
                 <div className="row justify-content-center">
                     <div className="col-md-6">
-                        <p className="text-display">{props.command == null ? "SPACE":props.command}</p>
+                        <p className={"text-display "+(props.animation != null ? props.animation:"")}>{props.command == null ? "SPACE":props.command}</p>
                         <h5>{props.message == null ? "Hit Space to Continue":props.message}</h5>
+                        {props.secondMsg != null ?
+                        <h5>{props.secondMsg}</h5>
+                        :""}
                     </div>
                 </div>
             </div>

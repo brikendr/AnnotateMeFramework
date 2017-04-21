@@ -15,25 +15,38 @@ var GamePoint = React.createClass({
     componentDidMount() {
         require('../../../styles/neonShine.css');
         
-		this.playAudio();
-        //Update Player Score 
-        this.props.setPlayerScore(this.props.point);
+		this.playGameScoreAudio();
 
-        //Update Score in db 
-        var PlayerInfo = this.props.PlayerStats.Player;
-        registerPoint(PlayerInfo.points, PlayerInfo.id).
-            then(function(response) {
-                setTimeout(function() {
-                    console.log('animating down');
-                    this.setState({pointAnimation: "animated zoomOut"});
-                    
-                    this.destroyElement();
-                }.bind(this), 2000);
-            }.bind(this));
+        if(this.props.isOnboardingPoint == null) {
+            //Update Player Score 
+            this.props.setPlayerScore(this.props.point);
+
+            //Update Score in db 
+            var PlayerInfo = this.props.PlayerStats.Player;
+            registerPoint(PlayerInfo.points, PlayerInfo.id).
+                then(function(response) {
+                    setTimeout(function() {
+                        this.setState({pointAnimation: "animated zoomOut"});
+                        this.destroyElement();
+                    }.bind(this), 2000);
+                }.bind(this));
+        } else {
+            setTimeout(function() {
+                this.setState({pointAnimation: "animated zoomOut"});
+                this.destroyElement();
+            }.bind(this), 2000);
+        }
     },
-    playAudio () {
-        var audio = document.getElementById("sound-3");		
-        audio.play();
+    playGameScoreAudio () {
+        var audio = document.getElementById("sound-3");	
+        const playPromise = audio.play();
+        if (playPromise !== null){
+            playPromise.catch(() => { 
+                setTimeout(function(){
+                    audio.play();
+                },350);
+            })
+        }
     },
     destroyElement() {
         setTimeout(function() {
@@ -64,6 +77,7 @@ var styles = {
 }
 GamePoint.PropTypes = {
     point: PropTypes.number.isRequired,
+    isOnboardingPoint: PropTypes.bool,
     User: PropTypes.object.isRequired,
     PlayerStats: PropTypes.object.isRequired,
     setPlayerScore: PropTypes.func.isRequired

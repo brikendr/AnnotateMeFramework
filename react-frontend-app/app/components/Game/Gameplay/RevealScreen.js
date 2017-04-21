@@ -25,10 +25,12 @@ var RevealScreen = React.createClass({
     },
     componentDidMount() {
         var i = 1;
-        console.log(this.props.candidates);
         const mappedCandidates = this.props.candidates.map(candidate => 
             <GameCandidate key={candidate.id} name={candidate.candidate_name} number={i++}/>                  
         );
+
+        //append the NIL option 
+        mappedCandidates.push(<GameCandidate key={-1} name={"NONE OF THEM"} number={i++}/> )
 
         var i = 1;
         const mappedClues = this.props.contextClues.map(clue => 
@@ -49,7 +51,7 @@ var RevealScreen = React.createClass({
     },
     handleCandidateSelection(e){
         var val = this.state.bettingPoints;
-        if([49, 50, 51, 52].indexOf(e.keyCode) != -1) {
+        if(e.keyCode >= 49 &&  e.keyCode <= (49 + this.props.candidates.length)) {
             this.setState({selectedCandidate: e.keyCode - 49,animation: "bg-green-jungle bg-font-green-jungle animated bounce", showGamePoint: <GamePoint point={5}/>});
             this.playAudio("check-right");
             setTimeout(function () {
@@ -89,18 +91,19 @@ var RevealScreen = React.createClass({
     unbindListeners() {
         document.body.removeEventListener("keydown", this.handleCandidateSelection);
         //Persist Game data and betting (if player has bet)
+        var candidate = this.props.candidates[this.state.selectedCandidate];
         var gameData = {
             'wps': this.props.wpm,
             'typing_paragraph': this.props.paragraph.join(),
             'betscore': this.state.hasPlayerBet ? (this.state.bettingPoints / 10):0,
-            'EntityMentionId': 11,
-            'CandidateId': this.props.candidates[this.state.selectedCandidate].id,
-            'PlayerId': this.props.PlayerId
+            'EntityMentionId': this.props.entityMentionId,
+            'CandidateId': candidate != null ? candidate.id: null,
+            'PlayerId': this.props.PlayerId,
+            'gameRoundStart': this.props.gameStart
         }
         GameHelper.persistGameRound(gameData)
          .then(function(response){
-            console.log('GAME REGISTERED')
-            console.log(response);
+            this.props.setGameRoundId(response.resource.id);
             this.props.onGameStateChange("POINTS_CHALLENGE");
          }.bind(this));
         
@@ -136,7 +139,7 @@ var RevealScreen = React.createClass({
 
                 <div className={"row justify-content-center "}  >
                     <div className="col-5 text-center">
-                        <div className="clearfix">
+                        <div className="clearfix characterRevealMargin">
                             <audio src={assetsDir+"/audio/levelup.wav"} id="check-right"></audio>
                             <p>
                                 {this.props.charElements}
@@ -147,7 +150,7 @@ var RevealScreen = React.createClass({
                 {this.state.selectedACandidate ?
                 <div className={"row justify-content-center animated flipInX"}>
                     <div className="col-4 text-center">
-                        AWESOME! You selected <strong>{this.props.candidates[this.state.selectedCandidate].candidate_name}</strong>
+                        AWESOME! You selected <strong>{this.props.candidates[this.state.selectedCandidate] == null ? "NONE OF THEM":this.props.candidates[this.state.selectedCandidate].candidate_name}</strong>
                     </div>                    
                 </div>
                 : ""
@@ -159,7 +162,7 @@ var RevealScreen = React.createClass({
                             {this.state.mappedCandidates}
                         </div>
                         <div className="row justify-content-center">
-                            <h5>Press the number to select candidate!</h5>
+                            <h4>Press a number [1-{this.state.mappedCandidates.length}] to select candidate!</h4>
                         </div>
                     </div>
                 </div>
@@ -194,7 +197,9 @@ RevealScreen.propTypes = {
     contextClues: PropTypes.array.isRequired,
     PlayerId: PropTypes.number.isRequired,
     paragraph: PropTypes.array.isRequired,
-    wpm: PropTypes.number.isRequired
+    wpm: PropTypes.number.isRequired,
+    setGameRoundId: PropTypes.func.isRequired,
+    gameStart: PropTypes.number.isRequired
 };
 
 var styles = {

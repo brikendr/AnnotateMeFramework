@@ -11,7 +11,7 @@ var rootReducer = Redux.combineReducers({
 	game: gameReducer // gameReducer will operate on appState.game,
 });
 
-const middleware = Redux.applyMiddleware(promise(), logger);
+const middleware = Redux.applyMiddleware(promise());
 
 const persistedState = loadState();
 const store = Redux.createStore(rootReducer, persistedState, middleware);

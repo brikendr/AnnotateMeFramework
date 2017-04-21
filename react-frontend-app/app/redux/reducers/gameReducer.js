@@ -9,22 +9,18 @@ module.exports = function(state,action){
             return newstate;
         }
         case "SET_PLAYER_STATS": {
-            console.log("AT SET_PLAYER_STATS");
             newstate.playerStats = action.payload;
             return newstate;
         }
         case "SET_PLAYER_SCORE": {
-            console.log("AT SET_PLAYER_SCORE");
             newstate.playerStats.stats.Player.points = state.playerStats.stats.Player.points + action.payload;
             return newstate;
         } 
         case "SET_PLAYER_WPM": {
-            console.log("AT SET_PLAYER_WPM");
             newstate.playerStats.stats.current_wps = action.payload;
             return newstate;
         }
         case "SET_PLAYER_LEVEL": {
-            console.log("AT SET_PLAYER_LEVEL");
             newstate.playerStats.level = action.payload;
             return newstate;
         }

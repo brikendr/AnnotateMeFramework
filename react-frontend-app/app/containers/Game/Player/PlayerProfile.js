@@ -1,6 +1,8 @@
 var React = require('react');
 var PropTypes = React.PropTypes,
-    assetsDir = require('../../../utils/constatns').assets
+    assetsDir = require('../../../utils/constatns').assets,
+    actions = require('../../../redux/actions/authActions'),
+    GameHelper = require('../../../utils/GameHelper'),
     Badge = require('../../../components/Game/Extras/ProfileBadges');
 
 var PlayerProfile = React.createClass({
@@ -9,13 +11,36 @@ var PlayerProfile = React.createClass({
             mappedCandidates: [],
             animation: "",
             showGamePoint: null,
+            playerStats: null,
+            challengeStats: {
+                'wins': 0,
+                'loses': 0,
+                'draw': 0
+            }
         }
+    },
+    propTypes:{
+        User: PropTypes.object.isRequired,
+        toggleDataFetching: PropTypes.func.isRequired,
+        fetchingData: PropTypes.bool.isRequired,
+        playerStats: PropTypes.object.isRequired
     },
     componentDidMount() {
         require('../../../styles/profile.css');
         require('../../../assets/js/plugins/jquery.flot.min.js');
         require('../../../assets/js/plugins/jquery.flot.categories.min.js');
-        this.drawChart();
+
+        this.props.toggleDataFetching();
+        
+        //GET Profile stats from db
+        GameHelper.getProfileStats(this.props.User.information.id)
+         .then(function(response){
+             this.setState({playerStats: response.resource});
+             this.calculateChallengeRatios(response.resource.challengeRatio)
+             this.props.toggleDataFetching();
+             this.drawChart();
+         }.bind(this));
+        
     },
     handleCandidateSelection(e){
         if([49, 50, 51, 52].indexOf(e.keyCode) != -1) {
@@ -28,6 +53,26 @@ var PlayerProfile = React.createClass({
             }
             this.unbindListeners();
         } 
+    },
+    calculateChallengeRatios(challengeRatio) {
+        var challengeStats = this.state.challengeStats;
+        for(var i=0; i < challengeRatio.length; i++) {
+            switch(challengeRatio[i].status) {
+                case 1:
+                case 4: {
+                    challengeStats.wins += challengeRatio[i].count;break;
+                } 
+                case 2: 
+                case 5: {
+                    challengeStats.loses += challengeRatio[i].count;break;
+                }
+                case 3:
+                case 6: {
+                    challengeStats.draw += challengeRatio[i].count;break;
+                }
+            }
+        }
+        this.setState({challengeStats: challengeStats})
     },
     unbindListeners() {
         //document.body.removeEventListener("keydown", this.handleCandidateSelection);
@@ -48,29 +93,27 @@ var PlayerProfile = React.createClass({
                     'background-color': '#fff'
                 }).appendTo("body").fadeIn(200);
             }
-        var visitors = [
-                ['02/2013', 20],
-                ['03/2013', 34],
-                ['04/2013', 17],
-                ['05/2013', 33],
-                ['06/2013', 56],
-                ['07/2013', 43],
-                ['08/2013', 48],
-                ['09/2013', 15],
-                ['10/2013', 26]
-            ];
+        var wpmHistory = this.state.wpmPerformance;
         $('#site_statistics_loading').hide();
         $('#site_statistics_content').show();
 
+        //Prepare Data 
+        var chartData = this.state.playerStats.wpmPerformances,
+            newData = [];
+        for(var i = 0; i < chartData.length; i++) {
+            var label = i == chartData.length - 1 ? "Last": (i+1);
+            newData.push([label, chartData[(chartData.length-1) - i].value]);
+        }
+        
         var plot_statistics = $.plot($("#site_statistics"), [{
-                data: visitors,
+                data: newData,
                 lines: {
                     fill: 0.6,
                     lineWidth: 0
                 },
                 color: ['#f89f9f']
             }, {
-                data: visitors,
+                data: newData,
                 points: {
                     show: true,
                     fill: true,
@@ -139,7 +182,16 @@ var PlayerProfile = React.createClass({
     },
     
     render() {
+        var UserData = this.props.User.information;
+        if(this.props.playerStats != null) {
+            var Statistics = this.props.playerStats,
+                levelProgress = Math.round((Statistics.stats.Player.points - Statistics.level.lower_limit) / (Statistics.level.upper_limit - Statistics.level.lower_limit) * 100);
+            
+        }
         return ( 
+            this.props.fetchingData ? 
+            <GameLoadingGif />
+            :
             <div className="container col-md-11 marginTop2 " style={styles.profileBackground}>
                 <div className="row justify-content-center marginTop5">
                     <div className="col-md-12">
@@ -151,13 +203,13 @@ var PlayerProfile = React.createClass({
                                 
                                 <div className="profile-usertitle">
                                     <div className="profile-usertitle-name"> {this.props.User.information.username} </div>
-                                    <div className="profile-usertitle-job"> Newbie </div>
+                                    <div className="profile-usertitle-job"> {Statistics.level.name} </div>
                                 </div>
                                 <div className="row justify-content-center">
                                     <div className="col-md-8">
                                         <div className="progress-info">
                                             <div className="progress progress-striped active">
-                                                <div className="progress-bar progress-bar-success green-sharp" role="progressbar" aria-valuenow={10} aria-valuemin="0" aria-valuemax="100" style={{width: "70%"}}></div>
+                                                <div className="progress-bar progress-bar-success green-sharp" role="progressbar" aria-valuenow={levelProgress} aria-valuemin="0" aria-valuemax="100" style={{width: levelProgress+"%"}}></div>
                                             </div>
                                         </div>
                                     </div>
@@ -165,17 +217,17 @@ var PlayerProfile = React.createClass({
                                 
                                 <div className="profile-userbuttons">
                                     <h4>Challenges</h4>
-                                    <button type="button" className="btn btn-circle red-thunderbird btn-sm">Lost: 3</button>
-                                    <button type="button" className="btn btn-circle grey-cascade btn-sm">Draw: 3</button>
-                                    <button type="button" className="btn btn-circle green-jungle btn-sm">Won: 5</button>
+                                    <button type="button" className="btn btn-circle red-thunderbird btn-sm">Lost: {this.state.challengeStats != null ? this.state.challengeStats.loses: "N/A"}</button>
+                                    <button type="button" className="btn btn-circle grey-cascade btn-sm">Draw: {this.state.challengeStats != null ? this.state.challengeStats.draw: "N/A"}</button>
+                                    <button type="button" className="btn btn-circle green-jungle btn-sm">Won: {this.state.challengeStats != null ? this.state.challengeStats.wins: "N/A"}</button>
                                 </div>
                                 <div className="row list-separated profile-stat">
                                     <div className="col-md-6 col-sm-6 col-xs-8">
-                                        <div className="uppercase profile-stat-title"> 37 </div>
+                                        <div className="uppercase profile-stat-title"> {this.state.playerStats != null ? this.state.playerStats.highestWpm: "N/A"} </div>
                                         <div className="uppercase profile-stat-text"> Highest WPM </div>
                                     </div>
                                     <div className="col-md-6 col-sm-6 col-xs-8">
-                                        <div className="uppercase profile-stat-title font-green-jungle"> 80% </div>
+                                        <div className="uppercase profile-stat-title font-green-jungle"> {this.state.playerStats != null ? this.state.playerStats.bettingRatio: "N/A"}% </div>
                                         <div className="uppercase profile-stat-text"> Betting Ratio </div>
                                     </div>
                                 </div>
@@ -188,34 +240,12 @@ var PlayerProfile = React.createClass({
                                         <div className="portlet light bordered">
                                             <div className="portlet-title">
                                                 <div className="caption caption-md">
-                                                    <span className="caption-subject font-blue-madison bold uppercase">WPM Performance Chart</span>
+                                                    <span className="caption-subject font-blue-madison bold uppercase">Performance Chart (Last 10 WPM performances)</span>
                                                 </div>
                                             </div>
                                             <div className="portlet-body">
                                                 <div id="site_statistics_content" > 
                                                     <div id="site_statistics" className="chart"> </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="col-md-12 col-sm-12 marginTop1">
-                                        <div className="portlet light bordered">
-                                            <div className="portlet-title">
-                                                <div className="caption caption-md">
-                                                    <span className="caption-subject font-blue-madison bold uppercase">Accomplishments</span>
-                                                </div>
-                                            </div>
-                                            <div className="portlet-body">
-                                                <div className="row">
-                                                    <Badge badgeName="Badge1" />
-                                                    <Badge badgeName="Badge1" />
-                                                    <Badge badgeName="Badge1" />
-                                                    <Badge badgeName="Badge1" />
-                                                    <Badge badgeName="Badge1" />
-                                                    <Badge badgeName="Badge1" />
-                                                    <Badge badgeName="Badge1" />
-                                                    <Badge badgeName="Badge1" />
-                                                    <Badge badgeName="Badge1" />
                                                 </div>
                                             </div>
                                         </div>
@@ -239,7 +269,7 @@ var styles = {
 // connect to Redux store
 var mapStateToProps = function(state){
     // This component will have access to `appstate.heroes` through `this.props.heroes`
-    return {User: state.user, fetchingData: state.game.fetchingData};
+    return {User: state.user, fetchingData: state.game.fetchingData, playerStats: state.game.playerStats};
 };
 var mapDispatchToProps = function(dispatch){
     return {

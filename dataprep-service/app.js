@@ -4,6 +4,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
 var annotateMeAPI = require('./routes/annotateme_api');
+var gameApi = require('./routes/game_api');
 
 var app = express();
 
@@ -17,7 +18,7 @@ app.use(cookieParser());
 
 //USE the defined application routes.
 app.use('/annotateme/api', attachCORSOptions, annotateMeAPI);
-
+app.use('/game/api', attachCORSOptions, gameApi);
 //Middleware 
 function attachCORSOptions(req, res, next) {
   res.setHeader('Content-Type', 'application/json');

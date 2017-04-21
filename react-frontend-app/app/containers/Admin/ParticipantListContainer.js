@@ -17,7 +17,6 @@ var ParticipantListContainer = React.createClass({
     componentDidMount: function() {
         DatastoreHelper.getAllParticipants()
         .then(function(participants) {
-            console.log("Participants are ",participants);
             this.setState({
                fetching: false,
                participants: participants

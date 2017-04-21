@@ -7,7 +7,7 @@ Body
   box-sizing: border-box;
 }
 
-body {
+.leaderboard {
   min-height: 450px !important;
   height: 100vh !important;
   margin: 0 !important;

@@ -110,9 +110,9 @@
   border-bottom-right-radius: 15px;
 }
 .dropdown-container .dropdown .notification-group .notification-tab {
-  padding: 0px 25px;
-  height: 40px;
-  line-height: 40px;
+  word-wrap: break-word;
+  height: 3em;
+  padding: 5px;
   text-align: center;
   font-size: 0.8em;
 }
@@ -120,6 +120,9 @@
 .notification-tab p {
   text-align: left !important;
   font-size: 0.8em !important;
+}
+.notification-group > a {
+  text-decoration: none;
 }
 .dropdown-container .dropdown .notification-group .notification-tab:hover {
   cursor: pointer;

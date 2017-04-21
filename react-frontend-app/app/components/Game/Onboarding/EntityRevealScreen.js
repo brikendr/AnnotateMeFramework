@@ -120,7 +120,7 @@ var EntityRevealScreen = React.createClass({
         if(e.keyCode == (48 + this.state.correctAnswer)) {
             this.setState({
                 didFinishRound: true,
-                showGamePoint: <GamePoint point={10}/>
+                showGamePoint: <GamePoint point={10} isOnboardingPoint={true}/>
             });
             this.props.changeScreenNr(4);
             this.unbindListeners();
@@ -163,8 +163,7 @@ var EntityRevealScreen = React.createClass({
             <div>
                 
                 <div className={"row justify-content-center " + (this.state.isEntityRevealed ? "":"hidden")}>
-                    <div className="col-10 text-center">
-                        <div className="clearfix">
+                    <div className="col-10 text-center stickyNotesDiv">
                             <ul>
                                 <GameClue clue="Pirates of Caribbean" />
                                 <GameClue clue="Tourist" />
@@ -173,12 +172,11 @@ var EntityRevealScreen = React.createClass({
                                 <GameClue clue="Scissorhands" />
                                 <GameClue clue="unique style" />
                             </ul>
-                        </div>
                     </div>
                 </div>
                 <div className={"row justify-content-center " + (this.state.isEntityRevealed ? "":"addTopMargin")}  >
                     <div className="col-8 text-center">
-                        <div className="clearfix">
+                        <div className="clearfix characterRevealMargin">
                             <p>
                                 {this.state.characterElements}
                             </p>
@@ -197,7 +195,7 @@ var EntityRevealScreen = React.createClass({
                             <Candidate name="Johnny Belushi" number={4} correctAnswer={this.state.correctAnswer} onCandidateSelection={this.handleCandidateSelection}/>
                         </div>
                         <div className="row justify-content-center">
-                            <h5>Press the number to select candidate!</h5>
+                            <h4>Press a number [1-4] to select a candidate!</h4>
                         </div>
                     </div>
                 </div>
@@ -228,7 +226,7 @@ var EntityRevealScreen = React.createClass({
                     </div>
                 </div>
                 <div className={this.state.didFinishRound ? "":"hidden"}>
-                    <SpaceActionBtn command="SPACE" message="Hit SPACE to Continue" divSize={12}/>
+                    <SpaceActionBtn command="SPACE" message="Hit SPACE to Continue" animation="animated bounce infinite" divSize={12}/>
                 </div>
                 {this.state.showGamePoint}
             </div>

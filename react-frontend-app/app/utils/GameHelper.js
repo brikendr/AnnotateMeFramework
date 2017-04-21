@@ -25,10 +25,9 @@ var GameHelper = {
             console.warn('Error in GameHelper:registerPlayer: ', err);
         });
     },
-    getCategories: function() {
-        return axios.get(MainUrl + 'categories')
+    getCategories: function(playerId) {
+        return axios.get(MainUrl + 'categories/'+playerId)
         .then(function (response) {
-            console.log(response.data);
             return response.data;
         })
         .catch(function (err) {
@@ -36,7 +35,7 @@ var GameHelper = {
         });
     },
     getCategoriesAndPlayerStats: function(playerId) {
-        return this.getCategories()
+        return this.getCategories(playerId)
             .then(function(categories){
                 return this.getPlayerStats(playerId).
                     then(function(playerStats){
@@ -50,7 +49,6 @@ var GameHelper = {
     getPlayerStats: function(playerID){
         return axios.get(MainUrl + 'playerStats/' + playerID)
         .then(function (response) {
-            console.log(response.data);
             return response.data;
         })
         .catch(function (err) {
@@ -73,7 +71,7 @@ var GameHelper = {
             return response.data;
         })
         .catch(function (err) {
-            console.warn('Error in GameHelper:getPlayerStats: ', err);
+            console.warn('Error in GameHelper:checkPlayerHasLeveledUp: ', err);
         });
     },
     persistGameRound: function(gameData) {
@@ -82,7 +80,88 @@ var GameHelper = {
             return response.data;
         })
         .catch(function (err) {
-            console.warn('Error in GameHelper:getPlayerStats: ', err);
+            console.warn('Error in GameHelper:persistGameRound: ', err);
+        });
+    },
+    updateGameRoundFinishTime: function(gameId) {
+        return axios.post(MainUrl + '/updateGameFinishTime', {'gameId': gameId, 'finishTime': new Date().getTime()})
+        .then(function (response) {
+            return response.data;
+        })
+        .catch(function (err) {
+            console.warn('Error in GameHelper:persistGameRound: ', err);
+        });
+    },
+    fetchPossibleChallengers: function(playerId, wpm) {
+        return axios.get(MainUrl + 'getPossibleChallengers/wpm/'+wpm+'/player/' + playerId)
+        .then(function (response) {
+            return response.data;
+        })
+        .catch(function (err) {
+            console.warn('Error in GameHelper:fetchPossibleChallengers: ', err);
+        });
+    },
+    registerChallengers: function(data) {
+        return axios.post(MainUrl + 'challengePlayers', {data})
+        .then(function (response) {
+            return response.data;
+        })
+        .catch(function (err) {
+            console.warn('Error in GameHelper:registerChallengers: ', err);
+        });
+    },
+    fetchPlayerChallenges: function(playerId) {
+        return axios.get(MainUrl + 'getPlayerChallenges/' + playerId)
+        .then(function (response) {
+            return response.data;
+        })
+        .catch(function (err) {
+            console.warn('Error in GameHelper:fetchPlayerChallenges: ', err);
+        });
+    },
+    getChallengeInfo: function(challengeId) {
+        return axios.get(MainUrl + 'getChallengeInfo/' + challengeId)
+        .then(function (response) {
+            return response.data;
+        })
+        .catch(function (err) {
+            console.warn('Error in GameHelper:getChallengeInfo: ', err);
+        });
+    },
+    updateChallenge: function(data){
+        return axios.post(MainUrl + 'updateChallenge', {data})
+        .then(function (response) {
+            return response.data;
+        })
+        .catch(function (err) {
+            console.warn('Error in GameHelper:updateChallenge: ', err);
+        });
+    },
+    getProfileStats: function(playerId) {
+        return axios.get(MainUrl + 'getProfileStats/' + playerId)
+        .then(function (response) {
+            return response.data;
+        })
+        .catch(function (err) {
+            console.warn('Error in GameHelper:getProfileStats: ', err);
+        });
+    },
+    getUpdatedChallenged: function(playerId) {
+        return axios.get(MainUrl + 'getUpdatedChallenges/' + playerId)
+        .then(function (response) {
+            return response.data;
+        })
+        .catch(function (err) {
+            console.warn('Error in GameHelper:getUpdatedChallenged: ', err);
+        });
+    },
+    getLeaderboard() {
+        return axios.get(MainUrl + 'getLeaderBoard/')
+        .then(function (response) {
+            return response.data;
+        })
+        .catch(function (err) {
+            console.warn('Error in GameHelper:getPlayersRanked: ', err);
         });
     }
 }

@@ -17,7 +17,6 @@ var LevelUp = React.createClass({
 		this.playAudio();
         this.jqueryAnimate();
         setTimeout(function() {
-            console.log('animating down');
             this.setState({pointAnimation: "animated zoomOut"});
             
             this.destroyElement();

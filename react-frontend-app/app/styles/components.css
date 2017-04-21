@@ -21773,3 +21773,7 @@ p.text-display {
     font-size: 25px;
     text-align: center;
 }
+
+.characterRevealMargin > p > button {
+  margin: 1%;
+}

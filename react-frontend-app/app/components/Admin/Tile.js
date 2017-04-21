@@ -10,9 +10,6 @@ var Tile = React.createClass({
         offset: PropTypes.string,
         size: PropTypes.number.isRequired
     },
-    componentDidMount: function() {
-        console.log('did mount');
-    },
     render: function() {
         return (
             <div className={"col-lg-"+this.props.size+" col-md-"+this.props.offset}>

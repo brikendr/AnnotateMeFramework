@@ -68,7 +68,7 @@ var RewardScreen = React.createClass({
                         <div className="mt-element-ribbon bg-grey-steel">
                             <div className="ribbon ribbon-border-hor ribbon-clip ribbon-color-danger uppercase">
                                 <div className="ribbon-sub ribbon-clip"></div> YAY!!!!!! YOU DID IT! </div>
-                            <p className="ribbon-content">Good Job for killing those keyboard keys! <br /> Behold, the secret word to the game</p>
+                            <p className="ribbon-content">Good Job for killing those keyboard keys! <br /> <strong className="font-red-mint">Behold, the secret word to the game</strong></p>
                             <br />
                             <h6>(psst, never talk about <strong>fightclub</strong>)</h6>
                         </div>
@@ -76,7 +76,7 @@ var RewardScreen = React.createClass({
                 </div>
                 <div className="row justify-content-center">
                     <div className="col-4 text-center">
-                        <h3> Password: <strong>fightclub</strong></h3>
+                        <h3> Game Secret: <strong>fightclub</strong></h3>
                         <h2 className="animated fadeInUp">{this.state.infoMessage}</h2>
                     </div>
                 </div>
@@ -84,13 +84,18 @@ var RewardScreen = React.createClass({
                     <div className="col-4">
                         <div className={"form-group form-md-line-input has-success " + this.state.usernameAnimation}>
                             <input className="form-control input-lg" autoFocus placeholder="Your username" type="username" value={this.state.username} onChange={this.handleUsernameChange}/>
+                            <label for="form_control_1">Username</label>
                         </div>
                     </div>
                 </div>
                 <div className={"row justify-content-center margin-top-10"}>
                     <div className="col-4">
                         <div className={"form-group form-md-line-input has-success " + this.state.passwordAnimation}>
-                            <input className="form-control input-lg" placeholder="Secret Keyword" type="password" value={this.state.password} onChange={this.handlePassChange}/>
+                            <input className="form-control input-lg" placeholder="Personal Secret" type="password" value={this.state.password} onChange={this.handlePassChange}/>
+                            <label for="form_control_1">Personal Secret</label>
+                        </div>
+                        <div className="row justify-content-center">
+                            <h4>You will use this information to enter the game!</h4>
                         </div>
                     </div>
                 </div>

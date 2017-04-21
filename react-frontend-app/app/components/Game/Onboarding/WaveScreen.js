@@ -14,7 +14,6 @@ var WaveScreen = React.createClass({
             currentWord:    <button className="btn sbold btn-circle btn-lg animated zoomIn">{this.props.words[0]}</button>,
             previousWord:   "",
             nextWord:       <button className="btn sbold btn-circle btn-xs grey-salsa animated zoomIn">{this.props.words[1]}</button>,
-            words: this.props.words,
             inputText: "",
             stats: "",
             hideInputField: "",
@@ -25,11 +24,12 @@ var WaveScreen = React.createClass({
     hanldeFastType(e) {
         if(e.keyCode == 32) {
             var currentText = this.state.inputText.trim();
-            var displayWord = this.state.words[this.state.currentWordIndex];
+            var displayWord = this.props.words[this.state.currentWordIndex];
             if(currentText === displayWord) {
                 //Display Next Word
                 nextIndex = this.state.currentWordIndex + 1;
-                if(nextIndex >= this.state.words.length) {
+                
+                if(nextIndex >= this.props.words.length) {
                     this.setState({
                         currentWord: <img src="app/assets/img/thumbsup.png" width="20%" />,
                         previousWord: "",
@@ -38,7 +38,7 @@ var WaveScreen = React.createClass({
                         hideInputField: "hidden",
                         hideActionBtn: "",
                         currentWordIndex: nextIndex,
-                        showGamePoint: <GamePoint point={10}/>
+                        showGamePoint: <GamePoint point={10} isOnboardingPoint={true}/>
                     });
                     this.generateStats(new Date().getTime());
                 } else {
@@ -55,13 +55,13 @@ var WaveScreen = React.createClass({
                 //make a red background 
                 this.playAudio("check-wrong");
                 this.setState({
-                    currentWord: <button className="btn sbold btn-circle btn-lg red-mint animated shake">{this.state.words[this.state.currentWordIndex]}</button>,
+                    currentWord: <button className="btn sbold btn-circle btn-lg red-mint animated shake">{this.props.words[this.state.currentWordIndex]}</button>,
                     inputText: currentText
                 });
             }
         } else {
             this.setState({
-                currentWord: <button className="btn sbold btn-circle btn-lg">{this.state.words[this.state.currentWordIndex]}</button>
+                currentWord: <button className="btn sbold btn-circle btn-lg">{this.props.words[this.state.currentWordIndex]}</button>
             });
         }
     },
@@ -77,11 +77,12 @@ var WaveScreen = React.createClass({
         });
     },
     generateStats(stoptime){
-        var wpm = calculateWPM(this.state.currentWordIndex + 1, stoptime, this.state.startTimespan)
+        var wpm = calculateWPM(this.state.currentWordIndex + 1, stoptime, this.state.startTimespan);
         this.setState({
-            stats: <span>Your Speed: <strong>{Math.round(wpm)}</strong> WPM (words per minute)</span>
+            stats: <span>Your Speed: <strong>{Math.round(wpm)}</strong> WPM (words per minute)</span>,
+            showGamePoint: <GamePoint point={10} isOnboardingPoint={true}/>
         });
-        this.props.changeScreenNr(1);
+        this.props.changeScreenNr(2);
         this.props.setPlayerStats({'wpm': wpm});
     },
     playAudio(soundID) {
@@ -121,7 +122,7 @@ var WaveScreen = React.createClass({
                     </div>
                 </div>
                 <div className={this.state.hideActionBtn}>
-                    <SpaceActionBtn command="SPACE" message="Hit SPACE to Continue" divSize={12}/>
+                    <SpaceActionBtn command="SPACE" message="Hit SPACE to Continue" animation="animated bounce infinite" divSize={12}/>
                 </div>
 
                 {this.state.showGamePoint}

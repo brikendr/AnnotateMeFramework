@@ -29,7 +29,7 @@ var BetModal = React.createClass({
                                                 <h5 className="bold uppercase">{this.props.points / 10 + (this.props.points > 10 ? " Points":" Point")} </h5>
                                             </form>
                                         </div>
-                                        <h5>Use Left - Right arrow to change value</h5>
+                                        <h4 className="font-dark">Use Left - Right arrow to change value</h4>
                                     </div>
                                 </div>
                             </div>

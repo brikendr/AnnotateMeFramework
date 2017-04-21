@@ -7,7 +7,8 @@ var React = require('react'),
     gameActions = require('../../redux/actions/utilActions'),
     CategoryTile = require('../../components/Game/Dashboard/CategoryTile'),
     PlayerGameStats = require('../../components/Game/Dashboard/PlayerGameStats'),
-    SpaceActionBtn = require('../../components/Game/SpaceActionBtn')
+    SpaceActionBtn = require('../../components/Game/SpaceActionBtn'),
+    toastr = require('../../assets/js/plugins/bootstrap-toastr/toastr.min.js');
 
 var GameHomeContainer = React.createClass({
     contextTypes: {
@@ -25,7 +26,10 @@ var GameHomeContainer = React.createClass({
         setPlayerStats: PropTypes.func.isRequired
     },
     componentWillMount(){
+        require('../../styles/toastr.min.css');
+
         this.props.toggleDataFetching();
+        //Get PlayerStats
         GameHelper.getCategoriesAndPlayerStats(this.props.User.information.id)
         .then(function(response){
             this.mapCategories(response.categories);
@@ -36,60 +40,88 @@ var GameHomeContainer = React.createClass({
             this.props.setPlayerStats(response.playerStats);
         }.bind(this));
         document.addEventListener("keydown", this.commandListener);
+
+        //Check if any challenge is updated and then notify player
+        GameHelper.getUpdatedChallenged(this.props.User.information.id)
+         .then(function(response){
+            response.resource.forEach(function(element) {
+                var status = element.status == 1 ? "success": element.status == 2 ? "error":"warning",
+                    message = element.status == 1 ? " won the challenge against ": element.status == 2 ? " lost the challenge against ":" typed with the same speed as ",
+                    pointDesc = element.status == 1 ? "<br> Points Won: "+element.challenged_points: element.status == 2 ? "<br> Points Lost: "+element.challenged_points:"<br> Points Shared: "+Math.round(element.challenged_points / 2);
+                this.showToastr(
+                    "YOU"+message+element.challengee.username + pointDesc,
+                    status,
+                    "toast-bottom-right");
+                
+                //After the pushNotifications are shown, update all challanges
+                var data = {
+                    'status': element.status + 3,
+                    'challengeId': element.id,
+                    'shouldUpdatePlayerScore': false
+                }
+                
+                GameHelper.updateChallenge(data); 
+            }.bind(this));
+
+         }.bind(this));
+
+         //Suggest a warmup
+         setTimeout(function(){
+            this.showToastr("Warmup your fingers by taking a quick practice. PRESS CTRL+Z to start!", "info","toast-bottom-left");
+         }.bind(this), 10000)
     },
     mapCategories(categories) {
         var i = 1;
         const catList = categories.map(category => 
-            <CategoryTile key={category.id} progress={40} categoryName={category.name} icon={category.logo_path} keyCode={i++} />
+            <CategoryTile key={category.id} progress={category.progress} categoryName={category.name} icon={category.logo_path} keyCode={i++} />
         );
+
         this.setState({
             mappedCategories: catList
         })
     },
     commandListener(e) {
-        switch(e.keyCode) {
-            case 49: {
-                alert('1');
-                break;
-            }
-            case 50: {
-                alert('2');
-                break;
-            }
-            case 51: {
-                alert('3');
-                break;
-            }
-            case 52: {
-                alert('4');
-                break;
-            }
-            case 53: {
-                alert('5');
-                break;
-            }
-            case 54: {
-                alert('6');
-                break;
-            }
-            case 55: {
-                alert('7');
-                break;
-            }
-            case 56: {
-                alert('8');
-                break;
-            }
+        if(this.state.mappedCategories[e.keyCode - 49] != null && this.state.mappedCategories[e.keyCode - 49].props.progress == 100) {
+            this.alertPlayer();
         }
+
         if (e.ctrlKey && e.keyCode == 32) {
-            var randomCategory = Math.floor((Math.random() * this.state.mappedCategories.length));
-            var selectedCategory = this.state.mappedCategories[randomCategory];
-            this.redirectGame('play');
+            //var randomCategory = Math.floor((Math.random() * this.state.mappedCategories.length));
+            
+            this.redirectGame('play', null);
+        } else if(e.ctrlKey && e.keyCode == 90) {
+            this.redirectGame('practice');
+        } else if (e.keyCode >= 49 && e.keyCode <= 49 + this.state.mappedCategories.length && this.state.mappedCategories[e.keyCode - 49] != null) {
+            this.redirectGame('play', this.state.mappedCategories[e.keyCode - 49].key);
         }
     },
-    redirectGame(path) {
+    alertPlayer() {
+        alert('THE CATEGORY IS COMPLETED, THERE ARE NO MORE ROUNDS IN THIS CATEGORY!');
+    },
+    redirectGame(path, categoryID) {
         document.removeEventListener("keydown", this.commandListener);
-        this.context.router.push(path);
+        this.context.router.push({
+            pathname: path,
+            state: {
+                categoryID: categoryID
+            }
+        });
+    },
+    showToastr(message, status, position) {
+        toastr.options = {
+            "closeButton": false,
+            "debug": false,
+            "positionClass": position,
+            "showDuration": "1000",
+            "hideDuration": "1000",
+            "timeOut": "20000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        }
+        toastr[status](message, "NOTIFICATION!");
     },
     render() {
         var UserData = this.props.User.information;
@@ -98,6 +130,7 @@ var GameHomeContainer = React.createClass({
                 levelProgress = Math.round((Statistics.stats.Player.points - Statistics.level.lower_limit) / (Statistics.level.upper_limit - Statistics.level.lower_limit) * 100);
             
         }
+        
         return (
             this.props.fetchingData ? 
             <GameLoadingGif />
@@ -119,10 +152,9 @@ var GameHomeContainer = React.createClass({
                         }
                         
                         
-                        <SpaceActionBtn command="CTRL + SPACE" message="Start random Game" />
+                        <SpaceActionBtn command="CTRL + SPACE" message="Start random Game" secondMsg="CTRL+Z for PRACTICE"/>
                     </div>
                 </div>
-                
             </div>
         )
     }

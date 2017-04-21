@@ -5,7 +5,9 @@ var React = require('react'),
 function LeaderboardPlayer(props) {
     var font = props.isSelf ? "font-white" : "",
         buttonColor = props.isSelf ? "white": "green",
-        style = props.isSelf ? "self-leaderboard-player": "";
+        style = props.isSelf ? "self-leaderboard-player": "",
+        id = props.id != null ? "you":"";
+    
     return (
         <div className={"mt-actions animated flipInX " + style} >
             <div className="mt-action ">
@@ -16,13 +18,13 @@ function LeaderboardPlayer(props) {
                     <div className="mt-action-row">
                         <div className="mt-action-info ">
                             <div className="mt-action-details ">
-                                <span className={"mt-action-author pull-left "+ font}>{props.name}</span>
+                                <span className={"mt-action-author pull-left "+ font}>[{props.rank}] {props.name}</span>
                                 <br />
-                                <p className={"mt-action-desc" + font}>{props.level}</p>
+                                <p className={"mt-action-desc" + font}>{props.level} {"(Points: "+props.points+")"}</p>
                             </div>
                         </div>
                         <div className="mt-action-buttons ">
-                            <button type="button" className={"btn btn-circle "+ buttonColor +" btn-outline"}>{props.wpm} WPM</button>
+                            <button id={id} type="button" className={"btn btn-circle "+ buttonColor +" btn-outline"}>{props.wpm} WPM</button>
                         </div>
                     </div>
                 </div>
@@ -41,7 +43,9 @@ LeaderboardPlayer.propTypes = {
   name: PropTypes.string.isRequired,
   level: PropTypes.string.isRequired,
   wpm: PropTypes.number.isRequired,
-  isSelf: PropTypes.bool
+  isSelf: PropTypes.bool,
+  points: PropTypes.number.isRequired,
+  rank: PropTypes.number.isRequired
 };
 
 module.exports = LeaderboardPlayer;

@@ -118,7 +118,7 @@ var getEntities = function(exlcudedEntities, callBack) {
     
 }
 
-var getNeighborEntities = function(entity, callBack) {
+exports.getNeighborEntities = function(entity, callBack) {
     //ABS(91 - (`end_index` + `start_index`))
     var entityPos = entity.end_index + entity.start_index;
     models.EntityMention.findAll({
@@ -166,7 +166,7 @@ var getEntityCandidates = function(entity, callBack) {
     });
 }
 
-var shuffleCandidateList = function(candidates, callBack) {
+exports.shuffleCandidateList = function(candidates, callBack) {
     for (var i = candidates.length - 1; i > 0; i--) {
         var j = Math.floor(Math.random() * (i + 1));
         var temp = candidates[i];
@@ -177,7 +177,7 @@ var shuffleCandidateList = function(candidates, callBack) {
     callBack(candidates);
 }
 
-var getDocumentKeywords = function(entity, callBack) {
+exports.getDocumentKeywords = function(entity, callBack) {
     models.Keyword.findAll({
         where: {
             DocumentId: entity.DocumentId
@@ -187,7 +187,7 @@ var getDocumentKeywords = function(entity, callBack) {
     });
 }
 
-var filterCandidateTypes = function(candidates, callBack) {
+exports.filterCandidateTypes = function(candidates, callBack) {
     for(var i=0; i < candidates.length; i++) {
         var schemaTypes = candidates[i].schema_type;
 

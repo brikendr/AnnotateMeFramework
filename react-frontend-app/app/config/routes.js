@@ -2,7 +2,7 @@ var React = require('react'),
   ReactRouter = require('react-router'),
   Router = ReactRouter.Router,
   Route = ReactRouter.Route,
-  hashHistory = ReactRouter.hashHistory,
+  hashHistory = ReactRouter.browserHistory,
   IndexRoute = ReactRouter.IndexRoute,
   Main = require('../components/Main'),
   Home = require("../components/Home");
@@ -36,6 +36,7 @@ var GameIntroScreen = require('../containers/Game/GameIntroContainer'),
   PlayerProfile = require('../containers/Game/Player/PlayerProfile'),
   GameLeaderboard = require('../containers/Game/Player/Leaderboard'),
   ChallengeGame = require('../containers/Game/ChallengeGame');
+  PracticeTyping = require('../components/Game/Extras/PracticeTyping');
 /*---------------------------------END GAME ROUTES--------------------------------------------*/
 //TODO CHANGE INDEX ROUTE TO GAME INTRO
 var routes = (
@@ -64,7 +65,9 @@ var routes = (
       <Route path='/play' component={GameplayContainer} />
       <Route path='/profile' component={PlayerProfile} />
       <Route path='/leaderboard' component={GameLeaderboard} />
-      <Route path='/challenge/:opponentID' component={ChallengeGame} />
+      <Route path='/challenge/:challengeId' component={ChallengeGame} />
+      <Route path='/practice' component={PracticeTyping} />
+      
     </Route>
   </Router>
 );

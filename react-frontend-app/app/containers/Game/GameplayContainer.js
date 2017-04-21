@@ -2,6 +2,7 @@ var React = require('react'),
     PropTypes = React.PropTypes,
     assets = require('../../utils/constatns').assets
     GameHelper = require('../../utils/GameHelper'),
+    GameDataPrep = require('../../utils/GamaDataPrep'),
     GameLoadingGif =  require('../../components/Game/GameLoadingGif'),
     ReactRedux = require("react-redux"),
     gameActions = require('../../redux/actions/utilActions'),
@@ -18,14 +19,23 @@ var GameplayContainer = React.createClass({
     },
     getInitialState: function() {
         return {
+            gameRoundID: null,
+            gameStart: new Date().getTime(),
             currentGameState: "TYPING",
             possibleGameStates: ["TYPING", "BONUS_QUESTION", "RESOLVING_ENTITY", "BETTING", "POINTS_CHALLENGE", "COMPLETED"],
             screenToShow: null,
             wpm: 0,
             charElements: [],
-            paragraph: ["The","quick", "brown", "fox", "dog" , "jumps", "over", "fox" ,"lazy"],
             bonusQuestion: {},
-            newLevel: null
+            newLevel: null,
+            //DATA FROM DB
+            entityMentionId: null,
+            paragraph: [],
+            entityName: "",
+            entityCandidates: [],
+            entityContextClues: [],
+            countRecursionLoop: 0
+
         }
     },
     propTypes:{
@@ -35,19 +45,70 @@ var GameplayContainer = React.createClass({
         setPlayerLevel: PropTypes.func.isRequired
     },
     componentDidMount(){
-        //document.addEventListener("keydown", this.commandListener);
-        this.changeGameState("TYPING");
+        //Fetch gameround data
+        this.getGameData();
     },
-    commandListener(e) {
-        switch(e.keyCode) {
-            case 49: {
-                alert('1');
-                break;
+    getGameData() {
+        GameDataPrep.fetchGameRoundData(this.props.PlayerStats.Player.id, this.props.location.state.categoryID)
+         .then(function(gameData){
+            if(gameData.candidates.length == 0) {
+                var recursionLoop = this.state.countRecursionLoop;
+                if(recursionLoop > 99) {
+                    alert('WE ARE SORRY. THERE SEEMS TO BE NO MORE DATA AVAILABLE TO PLAY. PLEASE CONTACT brikend.rama@gmail.com');
+                    window.location.href = "/";
+                    return;
+                }
+
+                this.setState({countRecursionLoop: recursionLoop + 1});
+                this.getGameData();
+                return;
             }
+            this.setState({
+                entityMentionId: gameData.entity.id,
+                entityName: gameData.entity.description,
+                entityCandidates: gameData.candidates
+            });
+            this.setParagraph(gameData.entity.Sentance.description, function(){
+                this.mappContextClues(gameData.docKeywords, gameData.neighborEntities, gameData.entity.Collocations, function(){
+                    this.changeGameState("TYPING");
+                }.bind(this));
+            }.bind(this));
+            
+         }.bind(this));
+    },
+    setParagraph(sentanceText, callBack){
+        var gameParagraph = sentanceText.replace(/[^\w\s]|_/g, "").replace(/\s+/g, " "),
+            paragraptArray = gameParagraph.split(" "),
+            paragraphFiltered = paragraptArray.filter(function(e){return e});
+
+        this.setState({
+            paragraph: paragraphFiltered
+        });
+        callBack();
+    },
+    mappContextClues(docKeywords, neighborEntities, collcoations, callBack){
+        var contextClues = [];
+        //map neighbor entities
+        for(var i=0; i< neighborEntities.length; i++){
+            contextClues.push(neighborEntities[i].description);
         }
+        //map document keywords
+        for(var i=0; i< docKeywords.length; i++){
+            contextClues.push(docKeywords[i].keyword);
+        }
+        //map collocations
+        for(var i=0; i< collcoations.length; i++){
+            contextClues.push(collcoations[i].collocation_json);
+        }
+        this.setState({
+            entityContextClues: contextClues
+        });
+        callBack();
+    },
+    setGameRoundId(gameId) {
+        this.setState({gameRoundID: gameId});
     },
     redirectGame(path) {
-        document.removeEventListener("keydown", this.commandListener);
         this.context.router.push(path);
     },
     changeGameState(newState) {
@@ -58,10 +119,10 @@ var GameplayContainer = React.createClass({
                     onGameStateChange={this.changeGameState} 
                     setTypingStats={this.handleStats} 
                     words={this.state.paragraph}
-                    entityToReveal="JOHNNY"
+                    entityToReveal={this.state.entityName}
                     shouldPlayGamePoint={true}
                     nextScreen="BONUS_QUESTION"
-                    PlayerStats={this.props.PlayerStats} />
+                    PlayerStats={this.props.PlayerStats}/>
                     break;
             }
             case "BONUS_QUESTION": {
@@ -75,11 +136,14 @@ var GameplayContainer = React.createClass({
                 screenToShow = <RevealScreen 
                     onGameStateChange={this.changeGameState} 
                     charElements={this.state.charElements}
-                    candidates={[{"id": 43,"candidate_name":"Johhny Chase"},{"id": 44,"candidate_name":"Johnny Depp"},{"id": 45,"candidate_name":"Johnny CORP"},{"id": 50,"candidate_name":"Johnny Gambini"}]}
-                    contextClues={["Pirates of Caribbean", "Tourist", "Jack Sparrow", "Leading Role", "Scissorhands", "unique style"]}
+                    entityMentionId={this.state.entityMentionId}
+                    candidates={this.state.entityCandidates}
+                    contextClues={this.state.entityContextClues}
                     PlayerId={this.props.PlayerStats.Player.id}
                     paragraph={this.state.paragraph}
                     wpm={this.state.wpm}
+                    setGameRoundId={this.setGameRoundId}
+                    gameStart={this.state.gameStart}
                          />
                     break;
             }
@@ -88,13 +152,14 @@ var GameplayContainer = React.createClass({
                     onGameStateChange={this.changeGameState}
                     challengePlayers={this.challengePlayers}
                     wpm={this.state.wpm}
+                    Player={this.props.PlayerStats.Player}
                     />;
                 break;
             } case "COMPLETED": {
-                console.log(this.props.Level, this.props.PlayerStats.Player);
+                //Update GameTimespan (For experimental purposes only)
+                GameHelper.updateGameRoundFinishTime(this.state.gameRoundID);
                 GameHelper.checkPlayerHasLeveledUp(this.props.Level, this.props.PlayerStats.Player)
                  .then(function(response){
-                     console.log(response);
                      if(response.resource.updated) {
                         //Player has leveld up 
                         if(response.resource.status == "upgrade") {
@@ -129,9 +194,21 @@ var GameplayContainer = React.createClass({
                 this.props.setPlayerWPM(stats.wpm);
             }.bind(this));
     },
-    challengePlayers(playersToChallenge) {
-        //TODO: register challenges
-        console.log("REGISTERING CHALLENGES");
+    challengePlayers(playersToChallenge, challengedPoints) {
+        if(playersToChallenge.length > 0) {
+            //challenge only if player has selected someone to challenge
+            var data = {
+                'challengees': playersToChallenge, 
+                'player': this.props.PlayerStats.Player.id, 
+                'wpm': this.state.wpm, 
+                'challengedPoints': challengedPoints, 
+                'gameId': this.state.gameRoundID
+            }
+            GameHelper.registerChallengers(data)
+             .then(function(response) {
+                console.log('CHALLENGE PERSISTED');
+             });
+        }
     },
     playAudio(soundID) {
         var audio = document.getElementById(soundID);		

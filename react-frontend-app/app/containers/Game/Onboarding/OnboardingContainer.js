@@ -15,16 +15,43 @@ var OnBoardingContainer = React.createClass({
             screenNr: 1,
             currentScreen: <IntroScreen onSpaceClick={this.handleSpaceClick} />,
             wave1Words: [
-                "this",
-                "hello",
-                "type",
-                "fast"
+                "the",
+                "quick",
+                "brown",
+                "fox",
+                "jumps",
+                "over",
+                "the",
+                "lazy",
+                "dog"
             ],
             wave2Words: [
+                "he",
+                "is",
                 "known",
-                "teen",
-                "idol"
+                "for",
+                "his",
+                "epic",
+                "performance",
+                "on",
+                "one",
+                "of",
+                "the",
+                "most",
+                "successful",
+                "pirate",
+                "movies",
+                "of",
+                "all",
+                "time",
+                "its",
+                "jack",
+                "and",
+                "his",
+                "beloved",
+                "rum"
             ],
+
             hasFinishedRound: false,
             screenOneState: 1,
             screenTwoState: 1,
@@ -53,13 +80,20 @@ var OnBoardingContainer = React.createClass({
         if(e.keyCode == 32 && (this.state.hasFinishedRound || scNr == 1)) {
             if(scNr == 1 && [1, 2, 3].indexOf(this.state.screenOneState) != -1) {
                 var screenOneNext = this.state.hasFinishedRound ? this.state.screenOneState + 1:this.state.screenOneState;
-                var finishedRoundOne = this.state.screenOneState == 2 ? false:true;
+                var finishedRoundOne = this.state.screenOneState == 2 ? true:false;
                 this.setState({
                     screenNr: 1,
                     screenOneState: screenOneNext,
                     hasFinishedRound: finishedRoundOne,
                     currentScreen: <WaveScreen words={this.state.wave1Words} onFinishWave={this.handleSpaceClick} changeScreenNr={this.handleChangeScreen} setPlayerStats={this.setPlayerStats} />
                 });
+            } else if(scNr == 2) {
+                this.setState({
+                    screenNr: 3,
+                    screenOneState: 4,
+                    screenTwoState: 1,
+                    hasFinishedRound: true
+                })
             }
             else if(this.state.screenOneState == 4 && this.state.screenTwoState == 1) {
                 var scrTwoState = this.state.screenTwoState + 1;
