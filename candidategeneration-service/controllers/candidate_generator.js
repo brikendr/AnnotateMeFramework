@@ -48,7 +48,7 @@ var queryDBPediaSpotlight = function(entity, confidence, support, callBack){
     var options = {
         url: 'http://www.dbpedia-spotlight.com/en/candidates',
         form: {
-            text: entity.newDescription,
+            text: entity.Sentance.description,
             confidence: confidence,
             support: support,
             policy: 'whitelist'            
@@ -63,8 +63,10 @@ var queryDBPediaSpotlight = function(entity, confidence, support, callBack){
             callBack(candidateList);
         } else {
             if(surfaceForms.length != null){
+                var hasEmptyCandidateList = true;
                 for(var i = 0; i < surfaceForms.length; i++) {
-                    if((surfaceForms[i].name.trim()).indexOf(entity.description.trim()) != -1 || (entity.description.trim()).indexOf(surfaceForms[i].name.trim()) != -1) {
+                    if(((surfaceForms[i].name.trim()).indexOf(entity.description.trim()) != -1 || (entity.description.trim()).indexOf(surfaceForms[i].name.trim()) != -1) && hasEmptyCandidateList) {
+                        
                         var conditionBorder = surfaceForms[i].resource.length > 8 ? (surfaceForms[i].resource.length - 8):0;
                         if(surfaceForms[i].resource.length == null) {
                             var candidate = surfaceForms[i].resource;
@@ -84,21 +86,34 @@ var queryDBPediaSpotlight = function(entity, confidence, support, callBack){
                             }
                         }
                         
+                        //Register candidate as having retrieved candidates
+                        hasEmptyCandidateList = false;
+                    } else {
+                        console.log(surfaceForms[i].name.trim(), " IS NOT THE SAME AS ",entity.description.trim(), hasEmptyCandidateList);
                     }
                 }
             } else {
                 var condition = surfaceForms.resource.length <= 8 ? 0:surfaceForms.resource.length-8;
                 var length = surfaceForms.resource.length;
-                for(var k = length - 1; k >= condition; k--){
-                    var candidate = surfaceForms.resource[k];
-                    
-                    candidate.finalScore = parseFloat(Number(candidate.finalScore).toFixed(8));
-                    candidate.rank = length - k; //First rank is 1 not 0
-                    candidate.totalRank =  length - condition;
-                    candidate.EntityMentionID = entity.id;
-                    candidateList.push(candidate);
+                if(length == null) {
+                    //there is only one candidate
+                    var candidate = surfaceForms.resource;
+                        candidate.finalScore = parseFloat(Number(candidate.finalScore).toFixed(8));
+                        candidate.rank = length - k; //First rank is 1 not 0
+                        candidate.totalRank =  length - condition;
+                        candidate.EntityMentionID = entity.id;
+                        candidateList.push(candidate);
+                } else {
+                    //there are more than 1 candidate, there are [length] candidates
+                    for(var k = length - 1; k >= condition; k--){
+                        var candidate = surfaceForms.resource[k];
+                        candidate.finalScore = parseFloat(Number(candidate.finalScore).toFixed(8));
+                        candidate.rank = length - k; //First rank is 1 not 0
+                        candidate.totalRank =  length - condition;
+                        candidate.EntityMentionID = entity.id;
+                        candidateList.push(candidate);
+                    }
                 }
-                
             }
             callBack(candidateList);  
         }   

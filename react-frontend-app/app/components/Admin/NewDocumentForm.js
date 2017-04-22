@@ -20,6 +20,9 @@ function NewDocumentForm(props) {
                                 <label className="control-label visible-ie8 visible-ie9">Confidance</label>
                                 <input className="form-control form-control-solid placeholder-no-fix" type="text" placeholder="Confidance" onChange={props.onConfidenceChange} /> </div>
                             <div className="form-group">
+                                <label className="control-label visible-ie8 visible-ie9">Category</label>
+                                <input className="form-control form-control-solid placeholder-no-fix" type="text" placeholder="Category" onChange={props.onCategoryChange} /> </div>
+                            <div className="form-group">
                                 <label className="control-label visible-ie8 visible-ie9">Support</label>
                                 <input className="form-control form-control-solid placeholder-no-fix" type="text" placeholder="Support" onChange={props.onSupportChange} /> </div>
                             <div className="form-group">
@@ -64,6 +67,7 @@ NewDocumentForm.propTypes = {
     onKeywordNrChange: PropTypes.func.isRequired,
     onConceptNrChange: PropTypes.func.isRequired,
     toggleCheckboxValue: PropTypes.func.isRequired,
+    onCategoryChange: PropTypes.func.isRequired,
     onInputChange: PropTypes.func.isRequired
 }
 

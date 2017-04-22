@@ -12,6 +12,17 @@ exports.findEntitiesByDocumentID = function(data, callBack){
     });
 }
 
+exports.findEntitiesByDocumentIDWithSentance = function(data, callBack){
+    models.EntityMention.findAll({
+        where: {
+            documentID: data.documentID
+        },
+        include: [models.Sentance]
+    }).then(function(entities){
+        callBack(entities);
+    });
+}
+
 exports.createEntityCollocations = function(data, callBack){
     var entities = data.entities;
     

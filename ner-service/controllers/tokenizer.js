@@ -14,7 +14,13 @@ exports.tokenizeText = function(text, onResult){
     var tokens2 = text.split(/\s*\b\s*/);
     var sentancesByPeriod = tokenize.re(/([^\n\.;!?]+)/i);
     var sections = sentancesByPeriod(text);
-    onResult(tokens, tokens2, sections);
+    var filteredSections = [];
+    for(var i = 0; i < sections.length; i++) {
+        if(sections[i].value.trim() != ''){ 
+            filteredSections.push(sections[i]);
+        }
+    }
+    onResult(tokens, tokens2, filteredSections);
 };
 
 
@@ -136,7 +142,6 @@ exports.mentionMerging = function(entities, tokens, callback) {
 
         // Locate entity in the tokens sequence, targetTokenIdx is the last word if the entity is a word composition
         var idxFirst = getEntityOccurrance(currentEntity, tokens, 2);
-        
         // Check for nextEntity in array 
         if(i < entities.length-1) {
             //Get next entity mention 
@@ -147,7 +152,12 @@ exports.mentionMerging = function(entities, tokens, callback) {
             
             //If there are no tokens between entities, we merge them 
             var diff = idxNext - idxFirst;
-            if(diff == 1) {
+            
+            if(diff = 0) {
+                //there are multiple entities with the same name 
+                mergedEntities.push(currentEntity);
+            }
+            else if(diff == 1) {
                 //Merge the two entities
                 var mergedEntity = mergeTwoEntities(currentEntity, nextEntity, "");
                 mergedEntities.push(mergedEntity);
@@ -244,11 +254,39 @@ exports.mentionFiltering = function(entities, callback) {
             filteredEntities.push(entities[i]);
         }
     }
-
+    
     //Return callback function with the filtered entities
     callback(filteredEntities);
 }
 
+exports.similarMentionMerging = function(entities, callback) {
+    console.log("tokenizer::similarMentionMerging");
+    var finalEntities = [];
+
+    loop1:
+    for(var i = 0; i < entities.length; i++) {
+        var outerEntityName = entities[i].name;
+        
+        var pushed = false;
+        loop2:
+        for(var j=i+1; j < entities.length; j++) {
+            var innerEntityName = entities[j].name;
+            
+            if(outerEntityName.includes(innerEntityName) || innerEntityName.includes(outerEntityName)) {
+                
+                if(innerEntityName.length > outerEntityName.length) {
+                    entities[i].name = innerEntityName;
+                    outerEntityName = innerEntityName; 
+                }
+            }
+        }
+        if(finalEntities.map(function(e) { return e.name; }).indexOf(entities[i].name) == -1){
+            finalEntities.push(entities[i]);
+        }
+    }
+    
+    callback(finalEntities);
+}
 
 /**
  * getEntityOccurrance:     Function that finds the occurrance of an entity in the tokens array, 

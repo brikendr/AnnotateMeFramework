@@ -16,6 +16,7 @@ var NewDocumentContainer = React.createClass({
             dataset: '',
             confidence: '',
             support: '',
+            categoryId: '',
             keywords: 4,
             concepts: 2,
             sentanceRestrictered: false
@@ -49,6 +50,7 @@ var NewDocumentContainer = React.createClass({
     handleSupportChange: function(e) {this.setState({support: e.target.value})},
     handleKeywordNrChange: function(e) {this.setState({keywords: e.target.value})},
     handleConceptNrChange: function(e) {this.setState({concepts: e.target.value})},
+    handleCategoryChange: function(e) {this.setState({categoryId: e.target.value})},
     handleToggleCheckbox: function() {this.setState({sentanceRestrictered: !this.state.sentanceRestrictered})},
     render: function() {
         return (
@@ -63,6 +65,7 @@ var NewDocumentContainer = React.createClass({
                         onSupportChange={this.handleSupportChange}
                         onKeywordNrChange={this.handleKeywordNrChange}
                         onConceptNrChange={this.handleConceptNrChange}
+                        onCategoryChange={this.handleCategoryChange}
                         toggleCheckboxValue={this.handleToggleCheckbox}
                         onInputChange={this.handleInputChange} /> 
                 </AdminMainComponent>

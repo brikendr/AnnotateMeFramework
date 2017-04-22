@@ -34,6 +34,7 @@ connection.on('ready', function(){
                                         'textData'              : document.content,
                                         'confidence'            : message.confidence,
                                         'support'               : message.support,
+                                        'categoryId'            : message.categoryId,
                                         'nrKeywordsToExtract'   : message.nrKeywordsToExtract,
                                         'nrConceptsToExtract'   : message.nrConceptsToExtract
                                     },  
@@ -60,7 +61,7 @@ connection.on('ready', function(){
 
                                 //Get entities by documentID and publish msg for candidate generation
                                 console.log('Publishing message to generate candidate entities!');
-                                entityController.findEntitiesByDocumentID(message, function(docEntities){
+                                entityController.findEntitiesByDocumentIDWithSentance(message, function(docEntities){
                                     exchange.publish(
                                         "extract.entity.candidates", 
                                         {

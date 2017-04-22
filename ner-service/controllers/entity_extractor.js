@@ -29,7 +29,8 @@ var getParseOptions = function(){
 exports.namedEntityExtractor = function(data, exchange, callBack){
     var textData = data.textData
     ,   confidence = data.confidence
-    ,   support = data.support,
+    ,   support = data.support
+    ,   categoryId = data.categoryId,
         documentID = data.documentID;
     
     //Tokenize text data 
@@ -67,25 +68,27 @@ exports.namedEntityExtractor = function(data, exchange, callBack){
                     tokenizer.mentionMerging(selectedEntities, tokens2, function(mergedEntities){
                         //Execute the mention filtering algorithm 
                         tokenizer.mentionFiltering(mergedEntities, function(filteredEntities){
-
-                            var finalResult = {
-                                "status"                : statusCode,
-                                "text"                  : textData,
-                                "documentID"            : documentID,
-                                "entities"              : filteredEntities,
-                                "stanford"              : NEREntities,
-                                "dbpedia"               : AnnotatorEntities,
-                                "sections"              : sections,
-                                "tokensWithPunctuations": tokens2,
-                                "tokensByWords"         : tokens,
-                                'confidence'            : confidence,
-                                'support'               : support,
-                                'nrKeywordsToExtract'   : data.nrKeywordsToExtract,
-                                'nrConceptsToExtract'   : data.nrConceptsToExtract
-                            }
-                            console.log('Everything went smooth, calling publish!');
-                            //Return callback
-                            callBack(finalResult);
+                            tokenizer.similarMentionMerging(filteredEntities, function(finalEntities){
+                                var finalResult = {
+                                    "status"                : statusCode,
+                                    "text"                  : textData,
+                                    "documentID"            : documentID,
+                                    "entities"              : finalEntities,
+                                    "stanford"              : NEREntities,
+                                    "dbpedia"               : AnnotatorEntities,
+                                    "sections"              : sections,
+                                    "tokensWithPunctuations": tokens2,
+                                    "tokensByWords"         : tokens,
+                                    'confidence'            : confidence,
+                                    'support'               : support,
+                                    'categoryId'            : categoryId,
+                                    'nrKeywordsToExtract'   : data.nrKeywordsToExtract,
+                                    'nrConceptsToExtract'   : data.nrConceptsToExtract
+                                }
+                                console.log('Everything went smooth, calling publish!');
+                                //Return callback
+                                callBack(finalResult);  
+                            });
                         });
                     });
                     

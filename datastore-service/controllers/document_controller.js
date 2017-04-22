@@ -18,6 +18,7 @@ exports.persistEntities = function(data, callBack) {
     var namedEntities   = data.entities,
     text                = data.text,
     documentID          = data.documentID,
+    categoryId          = data.categoryId,
     sentances           = data.sections,
     tokens              = data.tokensByWords;
 
@@ -35,7 +36,7 @@ exports.persistEntities = function(data, callBack) {
         saveSentance(sentance, documentID, function(savedSentance){
             
             async.forEach(namedEntities, function (entity, callback){ 
-                saveEntity(entity, savedSentance, documentID, function(savedEntity){
+                saveEntity(entity, categoryId, savedSentance, documentID, function(savedEntity){
                     callback();
                 });
             }, function(err) {
@@ -92,7 +93,7 @@ var saveSentance = function(sentance, documentID, callBack) {
     });
 }
 
-var saveEntity = function(entity, sentance, documentID, callBack) {
+var saveEntity = function(entity, categoryId, sentance, documentID, callBack) {
     var entityOffset = entity.index + entity.length;
     if (entityOffset >= sentance.start_index && entityOffset <= sentance.end_index) {
         models.EntityMention.create({
@@ -100,7 +101,8 @@ var saveEntity = function(entity, sentance, documentID, callBack) {
             start_index: entity.index,
             end_index: entity.index + entity.length,
             DocumentId: documentID,
-            SentanceId: sentance.id
+            SentanceId: sentance.id,
+            CategoryId: categoryId
         }).then(function(result){
             callBack(result);
         });

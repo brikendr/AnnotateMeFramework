@@ -42,7 +42,8 @@ router.post('/', function(req, res, next){
         ambiguity_threshold: req.body.threshold,
         DocumentId: req.body.documentId,
         EntityTypeId: req.body.typeId,
-        SentanceId: req.body.sentanceId
+        SentanceId: req.body.sentanceId,
+        CategoryId: req.body.categoryId
     }).then(function(result){
         //Return Response
         res.json({

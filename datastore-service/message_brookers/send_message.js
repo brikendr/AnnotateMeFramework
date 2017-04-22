@@ -15,6 +15,7 @@ exports.publishMessage = function(data, callback){
                     "path": data.path, 
                     'content': data.text, 
                     'dataset': data.dataset,
+                    'categoryId': data.categoryId,
                     'confidence': data.confidence,
                     'support': data.support,
                     'nrKeywordsToExtract': data.keywords,
