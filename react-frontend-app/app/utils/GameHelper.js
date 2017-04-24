@@ -172,6 +172,15 @@ var GameHelper = {
         .catch(function (err) {
             console.warn('Error in GameHelper:getPlayersRanked: ', err);
         });
+    },
+    encouragePlayersToPlay(playerId) {
+        return axios.get(MainUrl + 'getPlayerPositionInLeaderboard/' + playerId)
+        .then(function (response) {
+            return response.data;
+        })
+        .catch(function (err) {
+            console.warn('Error in GameHelper:getPlayersRanked: ', err);
+        });
     }
 }
 

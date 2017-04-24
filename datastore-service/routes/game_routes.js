@@ -436,7 +436,7 @@ router.get('/getLeaderBoard', function(req, res, next){
             "status": 200,
             "resource": leaderboard
         });
-    })
+    });
 });
 
 router.get("/botChallengePlayer/:id", function(req, res, next){
@@ -447,7 +447,6 @@ router.get("/botChallengePlayer/:id", function(req, res, next){
         if(totalGames == 1) {
             //check if player has already completed the challenge with bot 
             models.Challenge.count({where: {challengerId: 1, challengeeId: playerId, status: {$gt: 0}}}).then(function(challengeCount){
-                console.log("CHALLENGE COUNT IS ", challengeCount);
                 if(challengeCount == 0) {
                     //Create a challenge 
                     models.Challenge.create({
@@ -479,5 +478,30 @@ router.get("/botChallengePlayer/:id", function(req, res, next){
         
     });
 });
+
+router.get('/getPlayerPositionInLeaderboard/:id', function(req, res, next){
+    var playerId = req.params.id;
+
+    models.Player.findAll({
+        order: 'current_wps DESC',
+        include: [models.Playerstats],
+        limit: 15
+    }).then(function(leaderboard){
+        var playerPosInLeaderboard = -1;
+        for(var i=0; i<leaderboard.length; i++) {
+            if(leaderboard[i].id == playerId) {
+                //player is in top 15
+                playerPosInLeaderboard = i+1; //since i starts from 0
+            }
+        }
+        console.log('POSITION IS : ', playerPosInLeaderboard);
+        res.json({
+            "status": 200,
+            "resource": {
+                'position': playerPosInLeaderboard
+            }
+        });
+    })
+})
 
 module.exports = router;

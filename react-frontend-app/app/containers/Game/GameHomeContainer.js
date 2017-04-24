@@ -65,6 +65,9 @@ var GameHomeContainer = React.createClass({
 
          }.bind(this));
 
+         //Check players' position in leaderboard and encourage him/her when they are on top 10
+         this.encouragePlayersToPlay();
+
          //Suggest a warmup
          setTimeout(function(){
             this.showToastr("Warmup your fingers by taking a quick practice. PRESS CTRL+Z to start!", "info","toast-bottom-left");
@@ -79,6 +82,21 @@ var GameHomeContainer = React.createClass({
         this.setState({
             mappedCategories: catList
         })
+    },
+    encouragePlayersToPlay() {
+        //Check player position in leaderboard, if in top 10 - give encouraging notification, if position 11-15 (still encourage to be in top 10)
+        GameHelper.encouragePlayersToPlay(this.props.User.information.id)
+        .then(function(response) {
+            if(response.resource.position > 0 && response.resource.position <= 10) {
+                if(response.resource.position <= 5){
+                    this.showToastr('HURRAAAAY! You are among the top 5 best players in the leaderboard. AWESOME!!!','info','toast-bottom-right');
+                }else{
+                    this.showToastr('GREAT JOB! You are among the top 10 best players in the leaderboard. AWESOME!!!','info','toast-bottom-right');
+                }
+            } else if (response.resource.position > 10 && response.resource.position <= 15) {
+                this.showToastr('KEEP UP THE SPEED! You are close to reach the top 10 in the leaderboard.','info','toast-bottom-right');
+            }
+        }.bind(this));
     },
     commandListener(e) {
         if(this.state.mappedCategories[e.keyCode - 49] != null && this.state.mappedCategories[e.keyCode - 49].props.progress == 100) {
@@ -140,8 +158,10 @@ var GameHomeContainer = React.createClass({
                     <div className="row justify-content-center">
                         <div className="col-md-8">
                             <div className="row">
-                                
                                 {this.state.mappedCategories}
+                                <div className="col-md-12">
+                                    <h5>To select a category to play press a number [1 - {this.state.mappedCategories.length}]</h5>
+                                </div>
                             </div>
                         </div>
                         {this.state.playerStats != null ?

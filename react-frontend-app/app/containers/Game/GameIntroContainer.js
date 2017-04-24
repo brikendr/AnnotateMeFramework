@@ -21,7 +21,7 @@ var GameIntroContainer = React.createClass({
             username: "",
             password: "",
             isAuthenticating: false,
-            infoMessage: <span className="font-blue-soft font-sm sbold">Want to play! Type the secret combinations!</span>
+            infoMessage: <span className="font-blue-soft font-sm sbold">Want to play! Type the secret combinations! <br/>Use SPACE to go to next element!</span>
         }
     },
     propTypes:{
