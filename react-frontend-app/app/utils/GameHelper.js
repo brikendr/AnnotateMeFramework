@@ -1,5 +1,5 @@
-var axios = require('axios');
-
+var axios = require('axios'),
+    passwordHash = require('password-hash')
 
 const MainUrl = 'http://localhost:8123/game/';
 var GameHelper = {
@@ -157,6 +157,15 @@ var GameHelper = {
     },
     getLeaderboard() {
         return axios.get(MainUrl + 'getLeaderBoard/')
+        .then(function (response) {
+            return response.data;
+        })
+        .catch(function (err) {
+            console.warn('Error in GameHelper:getPlayersRanked: ', err);
+        });
+    },
+    shouldBotChallangePlayer(playerId) {
+        return axios.get(MainUrl + 'botChallengePlayer/' + playerId)
         .then(function (response) {
             return response.data;
         })

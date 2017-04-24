@@ -2,6 +2,7 @@ var React = require('react'),
     PropTypes = React.PropTypes,
     assets = require('../../utils/constatns').assets
     GameHelper = require('../../utils/GameHelper'),
+    HelperFunctions = require('../../utils/globalFunctions'),
     GameDataPrep = require('../../utils/GamaDataPrep'),
     GameLoadingGif =  require('../../components/Game/GameLoadingGif'),
     ReactRedux = require("react-redux"),
@@ -51,6 +52,7 @@ var GameplayContainer = React.createClass({
     getGameData() {
         GameDataPrep.fetchGameRoundData(this.props.PlayerStats.Player.id, this.props.location.state.categoryID)
          .then(function(gameData){
+             console.log(gameData);
             if(gameData.candidates.length == 0) {
                 var recursionLoop = this.state.countRecursionLoop;
                 if(recursionLoop > 99) {
@@ -63,9 +65,12 @@ var GameplayContainer = React.createClass({
                 this.getGameData();
                 return;
             }
+            //TEMP: remove the whitespace in the beginning of the entity name (if there is one )
+            var entityName = HelperFunctions.removeWhitespacesBeginningAndEnd(gameData.entity.description);
+            console.log("ENTITY NAME IS ", entityName);
             this.setState({
                 entityMentionId: gameData.entity.id,
-                entityName: gameData.entity.description,
+                entityName: entityName,
                 entityCandidates: gameData.candidates
             });
             this.setParagraph(gameData.entity.Sentance.description, function(){

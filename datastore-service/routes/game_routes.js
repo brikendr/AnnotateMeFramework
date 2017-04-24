@@ -2,7 +2,8 @@ var express     = require('express');
 var router      = express.Router();
 var models      = require('@brikendr/sequelize-models-annotateme/models'),
     gameController = require('../controllers/game_controller'),
-    moment      = require('moment');
+    moment      = require('moment'),
+    passwordHash = require('password-hash');
 
 //Authenticate Player 
 router.post('/authenticate', function(req, res, next) {
@@ -12,7 +13,6 @@ router.post('/authenticate', function(req, res, next) {
     models.Player.find({
         where: {
             username: username,
-            password: password,
             isactive: 1
         }
     }).then(function(result){
@@ -22,11 +22,19 @@ router.post('/authenticate', function(req, res, next) {
                 "errorMsg": "Resource not found!"
             });
         }
-
-        res.json({
-            "status": 200,
-            "resource": result
-        });
+        console.log("VERYFYING ", result.password);
+        if(passwordHash.verify(password, result.password)) {
+            res.json({
+                "status": 200,
+                "resource": result
+            });
+        } else {
+            res.json({
+                "status": 404,
+                "errorMsg": "Resource not found!"
+            });
+        }
+        
     });
 });
 
@@ -366,7 +374,7 @@ router.post('/updateChallenge', function(req, res, next){
             id: data.challengeId
         }
     }).then(function(result){
-        if(data.shouldUpdatePlayerScore) {
+        if(data.shouldUpdatePlayerScore && data.challengerId != 1) {//Do not update points if its the bot [aka id=1]
             //Set New Point 
             models.Player.update({
                 points: data.newPoints
@@ -430,4 +438,46 @@ router.get('/getLeaderBoard', function(req, res, next){
         });
     })
 });
+
+router.get("/botChallengePlayer/:id", function(req, res, next){
+    var playerId = req.params.id;
+    //Check if player has played one game round 
+    models.Game.count({ where: { PlayerId: playerId} }).then(function(totalGames) {
+        var shouldBotChallengePlayer = false;
+        if(totalGames == 1) {
+            //check if player has already completed the challenge with bot 
+            models.Challenge.count({where: {challengerId: 1, challengeeId: playerId, status: {$gt: 0}}}).then(function(challengeCount){
+                console.log("CHALLENGE COUNT IS ", challengeCount);
+                if(challengeCount == 0) {
+                    //Create a challenge 
+                    models.Challenge.create({
+                        p1_wps: 20, //bot id
+                        p2_wps: 40,
+                        status: 0,
+                        challenged_points: 10,
+                        challengerId: 1, //bot id
+                        challengeeId: playerId,
+                        GameId: 1,
+                    });
+                    shouldBotChallengePlayer = true;
+                }
+                res.json({
+                    "status": 200,
+                    "resource": {
+                        'shouldBotChallenge': shouldBotChallengePlayer
+                    }
+                });
+            });
+        } else {
+            res.json({
+                "status": 200,
+                "resource": {
+                    'shouldBotChallenge': shouldBotChallengePlayer
+                }
+            });
+        }
+        
+    });
+});
+
 module.exports = router;

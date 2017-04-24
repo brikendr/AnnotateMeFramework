@@ -2,7 +2,8 @@ var React = require('react');
 var PropTypes = React.PropTypes;
 var SpaceActionBtn = require('../SpaceActionBtn');
 var GameHelper = require('../../../utils/GameHelper');
-var assetsDir = require('../../../utils/constatns').assets;
+var assetsDir = require('../../../utils/constatns').assets,
+    passwordHash = require('password-hash');
 
 var RewardScreen = React.createClass({
     getInitialState: function() {
@@ -33,7 +34,7 @@ var RewardScreen = React.createClass({
             } else {
                 GameHelper.registerPlayer({
                     'username': this.state.username.trim(),
-                    'password': this.state.password,
+                    'password': passwordHash.generate(this.state.password.trim()),
                     'points': 20,
                     'wpm': Math.round(this.props.playerWpm)
                 }).then(function(response){
@@ -84,7 +85,7 @@ var RewardScreen = React.createClass({
                     <div className="col-4">
                         <div className={"form-group form-md-line-input has-success " + this.state.usernameAnimation}>
                             <input className="form-control input-lg" autoFocus placeholder="Your username" type="username" value={this.state.username} onChange={this.handleUsernameChange}/>
-                            <label for="form_control_1">Username</label>
+                            <label htmlFor="form_control_1">Username</label>
                         </div>
                     </div>
                 </div>
@@ -92,7 +93,7 @@ var RewardScreen = React.createClass({
                     <div className="col-4">
                         <div className={"form-group form-md-line-input has-success " + this.state.passwordAnimation}>
                             <input className="form-control input-lg" placeholder="Personal Secret" type="password" value={this.state.password} onChange={this.handlePassChange}/>
-                            <label for="form_control_1">Personal Secret</label>
+                            <label htmlFor="form_control_1">Personal Secret</label>
                         </div>
                         <div className="row justify-content-center">
                             <h4>You will use this information to enter the game!</h4>

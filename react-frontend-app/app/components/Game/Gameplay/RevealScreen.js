@@ -26,7 +26,7 @@ var RevealScreen = React.createClass({
     componentDidMount() {
         var i = 1;
         const mappedCandidates = this.props.candidates.map(candidate => 
-            <GameCandidate key={candidate.id} name={candidate.candidate_name} number={i++}/>                  
+            <GameCandidate key={candidate.id} name={candidate.candidate_name} number={i++} candidateType={candidate.schema_type != null ? candidate.schema_type.split(",")[candidate.schema_type.split(",").length - 1]:null} />                  
         );
 
         //append the NIL option 

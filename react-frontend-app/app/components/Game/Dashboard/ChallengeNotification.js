@@ -17,8 +17,18 @@ var ChallengeNotification = React.createClass({
         User: PropTypes.object.isRequired
     },
     componentDidMount() {
-        require('../../../styles/challengeNotificationStyle.css');
+        require('../../../styles/challengeNotificationStyle.css');        
         
+        this.fetchChallenges();
+        //TO AVOID COLDSTART: When player finishes his/her first game, create a bot challenge 
+        GameHelper.shouldBotChallangePlayer(this.props.User.information.id)
+        .then(function(response){
+            if(response.resource.shouldBotChallenge) {
+                this.fetchChallenges();
+            }
+        }.bind(this));
+    },
+    fetchChallenges() {
         //fetch any challenges
         GameHelper.fetchPlayerChallenges(this.props.User.information.id)
          .then(function(response){

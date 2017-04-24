@@ -11,7 +11,13 @@ function GameCandidate(props) {
                             <button className={"btn "} type="button">{props.number}</button>
                         </span>
                         <div className="input-group-control">
-                            <strong>{props.name}</strong>
+                            <strong>
+                                {props.name}
+                                {props.candidateType != null ?
+                                <h6>{props.candidateType.trim() != "" ? "["+props.candidateType+"]":""}</h6>
+                                :""}
+                                
+                            </strong>
                         </div>
                     </div>
                 </div>
