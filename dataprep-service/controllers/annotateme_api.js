@@ -146,7 +146,7 @@ exports.getNeighborEntities = function(entity, callBack) {
     });
 }
 
-var getEntityCollocations = function(entity, callBack) {
+exports.getEntityCollocations = function(entity, callBack) {
     models.Collocation.findAll({
         where: {
             EntityMentionId: entity.id

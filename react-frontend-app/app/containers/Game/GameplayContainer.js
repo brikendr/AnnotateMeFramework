@@ -50,10 +50,16 @@ var GameplayContainer = React.createClass({
         this.getGameData();
     },
     getGameData() {
-        GameDataPrep.fetchGameRoundData(this.props.PlayerStats.Player.id, this.props.location.state.categoryID)
+        GameDataPrep.fetchGameRoundData(this.props.PlayerStats.Player.id, this.props.location.state.categoryID, this.props.location.state.levelId)
          .then(function(gameData){
-             console.log(gameData);
-            if(gameData.candidates.length == 0) {
+            console.log('PRINTING GAME DATA');
+            console.log(gameData);
+            if(gameData == null) {
+                alert('LOOKS LIKE YOU COMPLETED THE CATEGORY. If the category progress bar has not reached 100% yet and you are getting this message, then you need to level up to access data from this category.');
+                window.location.href = "/";
+                return;
+            }
+            else if(gameData.candidates.length == 0) {
                 var recursionLoop = this.state.countRecursionLoop;
                 if(recursionLoop > 99) {
                     alert('WE ARE SORRY. THERE SEEMS TO BE NO MORE DATA AVAILABLE TO PLAY. PLEASE CONTACT brikend.rama@gmail.com');
@@ -67,14 +73,13 @@ var GameplayContainer = React.createClass({
             }
             //TEMP: remove the whitespace in the beginning of the entity name (if there is one )
             var entityName = HelperFunctions.removeWhitespacesBeginningAndEnd(gameData.entity.description);
-            console.log("ENTITY NAME IS ", entityName);
             this.setState({
                 entityMentionId: gameData.entity.id,
                 entityName: entityName,
                 entityCandidates: gameData.candidates
             });
             this.setParagraph(gameData.entity.Sentance.description, function(){
-                this.mappContextClues(gameData.docKeywords, gameData.neighborEntities, gameData.entity.Collocations, function(){
+                this.mappContextClues(gameData.docKeywords, gameData.neighborEntities, gameData.collocations, function(){
                     this.changeGameState("TYPING");
                 }.bind(this));
             }.bind(this));

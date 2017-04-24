@@ -121,7 +121,8 @@ var GameHomeContainer = React.createClass({
         this.context.router.push({
             pathname: path,
             state: {
-                categoryID: categoryID
+                categoryID: categoryID,
+                levelId: this.state.playerStats.level.id
             }
         });
     },
