@@ -8,9 +8,7 @@ exports.prepareGameData = function(reqData, callBack){
         levelId     = reqData.levelId;
     console.log('prepareGameData',reqData);
 
-    console.log("LEVEL ID IS ", levelId);
     var levelLimits = getParagraphLengthBasedOnLevel(levelId);
-    console.log("LEVEL LIMITS ARE ", levelLimits);
     //1. Query all entities from the table (exluding already annotated from the player and who belong in the specified category)
     getEntities(playerID, categoryID, levelLimits, function(entities){
 
