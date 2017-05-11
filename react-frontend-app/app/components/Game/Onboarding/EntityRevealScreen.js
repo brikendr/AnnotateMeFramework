@@ -33,7 +33,7 @@ var EntityRevealScreen = React.createClass({
         var entityCharacters = this.state.entityToReveal.split('');
         var charElements = [];
         for(var i = 0; i<entityCharacters.length; i++){
-            charElements[i] = <button key={i} type="button" className="btn uppercase btn-circle blue btn-outline animated flipInX "></button>;
+            charElements[i] = <button key={i} type="button" className="btn uppercase btn-circle dark btn-outline animated flipInX "></button>;
         }
         this.setState({
             characterElements: charElements

@@ -55,6 +55,7 @@ var PlayerProfile = React.createClass({
         } 
     },
     calculateChallengeRatios(challengeRatio) {
+        console.log(challengeRatio);
         var challengeStats = this.state.challengeStats;
         for(var i=0; i < challengeRatio.length; i++) {
             switch(challengeRatio[i].status) {
