@@ -160,8 +160,8 @@ var GameHomeContainer = React.createClass({
                         <div className="col-md-8">
                             <div className="row">
                                 {this.state.mappedCategories}
-                                <div className="col-md-12">
-                                    <h5>To select a category to play press a number [1 - {this.state.mappedCategories.length}]</h5>
+                                <div className="col-md-6">
+                                    <SpaceActionBtn command={"[1-"+this.state.mappedCategories.length+"] PLAY CATEGORY"} message="Press a number to play in category" divSize="12"/>
                                 </div>
                             </div>
                         </div>

@@ -6,11 +6,13 @@ var BetModal = React.createClass({
     componentDidMount() {
         require('../../../styles/modalStyle.css');
         require('../../../styles/slider.css');
+
+        console.log(this.props);
     },
     render(){
         return (
-        <div className="modal-wrapper">
-            <div className="modal" style={{height: '520px'}}>
+        <div className="modal-wrapper open">
+            <div className="modal" style={{height: '680px'}}>
                 <div className="head">
                     <h3 className="bold font-white">Betting Time!</h3>
                     <h5 className="font-white">Press ESC to exit</h5>
@@ -34,6 +36,34 @@ var BetModal = React.createClass({
                                 </div>
                             </div>
                         </div>
+                        <div className="clear">
+                            <div className="row justify-content-center">
+                                <div className="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                                    <a className="dashboard-stat dashboard-stat-v2 blue" href="#">
+                                        <div className="visual">
+                                        </div>
+                                        <div className="details">
+                                            <div className="number">
+                                                <span data-counter="counterup" >{this.props.rewardedPoints}</span>
+                                            </div>
+                                            <div className="desc"> Reward </div>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div className="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                                    <a className="dashboard-stat dashboard-stat-v2 red" href="#">
+                                        <div className="visual">
+                                        </div>
+                                        <div className="details">
+                                            <div className="number">
+                                                <span data-counter="counterup" >{this.props.punishmetPoints}</span>
+                                            </div>
+                                            <div className="desc"> Punishment </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                         <SpaceBtn command="CTRL + SPACE" message="Register BET" divSize={12}/>
                 </div>
             </div>
@@ -44,7 +74,9 @@ var BetModal = React.createClass({
 
 BetModal.propTypes = {
   handleCandidateSelection: PropTypes.func.isRequired,
-  points: PropTypes.number.isRequired
+  points: PropTypes.number.isRequired,
+  rewardedPoints: PropTypes.number.isRequired,
+  punishmetPoints: PropTypes.number.isRequired
 };
 
 module.exports = BetModal;

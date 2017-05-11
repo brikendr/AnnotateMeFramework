@@ -303,6 +303,7 @@ router.get('/getPossibleChallengers/wpm/:wpm/player/:id', function(req, res, nex
     var playerID = req.params.id,
         wpm = req.params.wpm;
 
+    //TODO: SELECT AVG WPMs
     models.Playerstats.findAll({
         where: {
             PlayerId: {$ne: playerID},

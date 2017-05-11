@@ -58,23 +58,25 @@ var saveChallenge = function(data, challengee, callBack) {
 }
 
 exports.getProfileStats = function(playerId, callBack) {
-    getChallengeRatio(playerId, function(challengeRatio){
-        getHighestWPM(playerId, function(highestWPM){
-            getBettingRatio(playerId, function(bettingRatio){
-                getWpmPerformanceHistory(playerId, function(wpmPerformances){
-                    callBack({
-                        'challengeRatio': challengeRatio,
-                        'highestWpm': highestWPM,
-                        'bettingRatio': bettingRatio,
-                        'wpmPerformances': wpmPerformances
+    getChallengerRatio(playerId, function(challengeRatio){
+        //getChallengeeRatio(playerId, function(challengeeRation){
+            getHighestWPM(playerId, function(highestWPM){
+                getBettingRatio(playerId, function(bettingRatio){
+                    getWpmPerformanceHistory(playerId, function(wpmPerformances){
+                        callBack({
+                            'challengeRatio': challengeRatio,
+                            'highestWpm': highestWPM,
+                            'bettingRatio': bettingRatio,
+                            'wpmPerformances': wpmPerformances
+                        });
                     });
                 });
             });
-        });
+        //});
     });
 }
 
-var getChallengeRatio = function(challengerId, callBack) {
+var getChallengerRatio = function(challengerId, callBack) {
     models.Challenge.findAll({
         attributes: ['status',[sequelize.fn('COUNT', sequelize.col('challengerId')), 'count']],
         where: {
@@ -84,6 +86,43 @@ var getChallengeRatio = function(challengerId, callBack) {
         group: ['Challenge.status'],
     }).then(function(c) {
         callBack(c);
+    });
+
+}
+
+var getChallengeeRatio = function(challengerId, callBack) {
+    models.Challenge.findAll({
+        attributes: ['status',[sequelize.fn('COUNT', sequelize.col('challengerId')), 'count']],
+        where: {
+            challengeeId: challengerId,
+            status: {$ne: 0}
+        },
+        group: ['Challenge.status'],
+    }).then(function(c) {
+        //Since we are querying challengeeId, the status should be the contrary if 2 means loose for challenger, that means win for challengee
+        var challengeeRatio = [];
+        for(var i = 0; i < c.length; i++) {
+            console.log(JOSN.parse(c[i]));
+            if(c[i].status != 3 && c[i].status != 6) {
+                console.log("COUNT IS ", c[i].count);
+                if(c[i].status == 1 || c[i].status == 4) {
+                    challengeeRatio[i] = {
+                        'status': c[i].status + 1,
+                        'count': c[i]['count']
+                    }
+                } else if(c[i].status == 2 || c[i].status == 5) {
+                    challengeeRatio[i] = {
+                        'status': c[i].status - 1,
+                        'count': c[i]['count']
+                    }
+                }
+            } else {
+                challengeeRatio[i] = c[i];
+            }
+        }
+        console.log(challengeeRatio);
+        console.log("CHALLENGEE COUNT ",challengeeRatio.length);
+        callBack(challengeeRatio);
     });
 
 }

@@ -153,20 +153,20 @@ var getParagraphLengthBasedOnLevel = function(levelId) {
         case 2:
         case 3: {
             lowerLimit = 0;
-            uppperLimit = 100;
+            uppperLimit = 250;
             break;
         }
         case 4:
         case 5:
         case 6: {
-            lowerLimit = 100;
-            uppperLimit = 200;
+            lowerLimit = 250;
+            uppperLimit = 300;
             break;
         }
         case 7:
         case 8:
         case 9: {
-            lowerLimit = 200;
+            lowerLimit = 300;
             uppperLimit = 50000;
             break;
         }

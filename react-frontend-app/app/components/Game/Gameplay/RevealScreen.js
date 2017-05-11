@@ -17,8 +17,10 @@ var RevealScreen = React.createClass({
             animation: "",
             selectedACandidate: false,
             selectedCandidate: null,
-            bettingPoints: 10,
-            playerIsBetting: false,
+            bettingPoints: 0,
+            rewardedPoints: 1,
+            punishmetPoints: 0,
+            playerIsBetting: true,
             hasPlayerBet: false,
             showGamePoint: null
         }
@@ -50,7 +52,11 @@ var RevealScreen = React.createClass({
         require('../../../styles/stickynotes.css');
     },
     handleCandidateSelection(e){
-        var val = this.state.bettingPoints;
+        var val = this.state.bettingPoints,
+            rewardPoints = val == 0 ? 1: (val / 10) + 1,
+            punishmentPoints = val == 0 ? 0:(val / 10) ;
+
+        console.log("VAL IS: ", val);
         if(e.keyCode >= 49 &&  e.keyCode <= (49 + this.props.candidates.length)) {
             this.setState({selectedCandidate: e.keyCode - 49,animation: "bg-green-jungle bg-font-green-jungle animated bounce", showGamePoint: <GamePoint point={5}/>});
             this.playAudio("check-right");
@@ -70,15 +76,25 @@ var RevealScreen = React.createClass({
             this.unbindListeners();
         }
         else if (e.keyCode == 37 && this.state.playerIsBetting) {
+            console.log("LEFT ARROW");
             //left ARROW
-            if(val > 10){
-                this.setState({bettingPoints: (val - 10)});
+            if(val > 0){
+                this.setState({
+                    bettingPoints: (val - 10),
+                    rewardedPoints:  (val-10) == 0 ? 1: ((val-10) / 10) + 1,
+                    punishmetPoints: (val-10) == 0 ? 0:((val-10) / 10)
+                });
             }           
         } 
         else if (e.keyCode == 39) {
+            console.log("LEFT ARROW");
             //right arrow
             if(val < 100){
-                this.setState({bettingPoints: (val + 10)});
+                this.setState({
+                    bettingPoints: (val + 10),
+                    rewardedPoints: (val+10) == 0 ? 1: ((val+10) / 10) + 1,
+                    punishmetPoints: (val+10) == 0 ? 0:((val+10) / 10)
+                });
             }
         } 
         else if((e.ctrlKey && e.keyCode == 32) && this.state.playerIsBetting) {
@@ -101,6 +117,7 @@ var RevealScreen = React.createClass({
             'PlayerId': this.props.PlayerId,
             'gameRoundStart': this.props.gameStart
         }
+        console.log(gameData);
         GameHelper.persistGameRound(gameData)
          .then(function(response){
             this.props.setGameRoundId(response.resource.id);
@@ -169,7 +186,9 @@ var RevealScreen = React.createClass({
                 
                 {this.state.selectedACandidate ? 
                     <BetModal   handleCandidateSelection={this.handleCandidateSelection}
-                                points={this.state.bettingPoints}/> : ""}
+                                points={this.state.bettingPoints}
+                                rewardedPoints={this.state.rewardedPoints}
+                                punishmetPoints={this.state.punishmetPoints}/> : ""}
                 
 
                 {this.state.selectedACandidate ? 
